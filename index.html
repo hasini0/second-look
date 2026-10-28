@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The privacy promise, enforced by the browser: this page may not send data anywhere. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Second Look</title>
+  <meta name="description" content="A calm second opinion for messages you're not sure about. Explains scam tactics in plain language, entirely on your device.">
+  <meta name="theme-color" content="#0f5f5a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site">
+    <div class="wrap header-row">
+      <a class="brand" href="#check" aria-label="Second Look home">
+        <svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><circle cx="20" cy="22" r="13" fill="none" stroke="currentColor" stroke-width="4"/><path d="M29.5 31.5 40 42" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M14 22.5l4 4 8-9" fill="none" stroke="var(--accent-2)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Second Look</span>
+      </a>
+      <div class="header-tools">
+        <a class="privacy-pill" href="#how" title="How your privacy is protected">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="4.5" y="10" width="15" height="11" rx="2.5" fill="currentColor"/></svg>
+          <span>On your device only</span>
+        </a>
+        <button class="icon-btn" id="textsize" type="button" aria-label="Change text size" title="Text size">Aa</button>
+      </div>
+    </div>
+    <nav class="wrap tabs" aria-label="Sections">
+      <a href="#check" data-view="check"><span class="long">Check a message</span><span class="short" aria-hidden="true">Check</span></a>
+      <a href="#recover" data-view="recover"><span class="long">Already responded?</span><span class="short" aria-hidden="true">Responded?</span></a>
+      <a href="#practice" data-view="practice">Practice</a>
+      <a href="#how" data-view="how">How it works</a>
+    </nav>
+  </header>
+
+  <main id="main" class="wrap" tabindex="-1">
+
+    <!-- ============ CHECK ============ -->
+    <section id="view-check" class="view" aria-labelledby="check-title">
+      <div class="intro">
+        <h1 id="check-title">Not sure about a message?</h1>
+        <p class="lede">Paste it here for a calm second opinion. Second Look points out the pressure tricks scams use, explains them in plain words, and tells you a safe next step. It never opens links, and your message never leaves this device.</p>
+      </div>
+
+      <div class="card input-card">
+        <label for="msg" class="field-label">The message</label>
+        <textarea id="msg" rows="7" spellcheck="false" autocomplete="off" placeholder="Paste a text, email or DM here. You can also type what a caller said."></textarea>
+        <div class="input-actions">
+          <button id="check" class="btn primary" type="button">Take a second look</button>
+          <label class="visually-hidden" for="examples">Try an example message</label>
+          <select id="examples" class="btn ghost select">
+            <option value="">Examples…</option>
+          </select>
+          <button id="clear" class="btn ghost" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+
+    <!-- ============ RECOVER ============ -->
+    <section id="view-recover" class="view" aria-labelledby="recover-title" hidden>
+      <div class="intro">
+        <h1 id="recover-title">Already tapped, replied or paid?</h1>
+        <p class="lede">It happens to careful, smart people every day. Scams are built by professionals to work. What matters now is acting quickly and in the right order. Tell us what happened and we'll build your plan.</p>
+      </div>
+      <p class="notice danger-notice" role="note"><strong>In danger or being threatened right now?</strong> Call 911 or your local emergency number. Second Look is a guide, not an emergency service.</p>
+
+      <fieldset class="card situations">
+        <legend class="field-label">What happened? Choose everything that applies.</legend>
+        <div id="situations" class="situation-grid"></div>
+      </fieldset>
+
+      <div id="plan" aria-live="polite"></div>
+    </section>
+
+    <!-- ============ PRACTICE ============ -->
+    <section id="view-practice" class="view" aria-labelledby="practice-title" hidden>
+      <div class="intro">
+        <h1 id="practice-title">Practice spotting scams</h1>
+        <p class="lede">Ten made-up messages. Some are scams, some are real, and some you can't judge from the message alone. Learning to say "I'd check first" is the most useful habit of all.</p>
+      </div>
+      <div id="practice"></div>
+    </section>
+
+    <!-- ============ HOW ============ -->
+    <section id="view-how" class="view" aria-labelledby="how-title" hidden>
+      <div class="intro">
+        <h1 id="how-title">How Second Look works</h1>
+        <p class="lede">Built to be trusted: it's private by design, open about what it checks, and honest about what it can't do.</p>
+      </div>
+
+      <div class="card">
+        <h2>Your message never leaves this device</h2>
+        <p>All checking happens in this browser tab. There is no server, no account, no AI service and no tracking. The page's security policy blocks it from making any outgoing data connection, even if we made a mistake in the code.</p>
+        <dl class="proof">
+          <div><dt>Network requests since this page loaded</dt><dd id="req-count">0</dd></div>
+          <div><dt>Outgoing data connections allowed</dt><dd><code>connect-src 'none'</code></dd></div>
+          <div><dt>Works with no internet</dt><dd id="offline-status">Checking…</dd></div>
+        </dl>
+        <p class="muted small">Don't take our word for it: switch on airplane mode and keep using it, or open your browser's developer tools and watch the Network tab while you check a message.</p>
+      </div>
+
+      <div class="card">
+        <h2>What it looks for</h2>
+        <p>Scams change their wording, but they rely on the same few levers: pressure, fear, greed, trust and secrecy, plus a way to get your money, codes or details. Second Look looks for those levers and for links that lie about where they go.</p>
+        <ul id="tactic-list" class="tactic-list"></ul>
+      </div>
+
+      <div class="card">
+        <h2>How well it works, measured honestly</h2>
+        <p>We wrote labelled test messages (all synthetic) and measured the rules in rounds. Each round, a brand-new set of messages was scored once, <em>before</em> we looked at what it missed. The first round showed the rules were overfit to our own examples (only 36% of new scams caught), so we rebuilt them around the structure of scams rather than specific phrases.</p>
+        <div id="eval-table"></div>
+        <button id="run-eval" class="btn ghost" type="button">Re-run the test on this device</button>
+        <p class="muted small">The number we stand behind is the last round, scored once and never tuned: it catches about two in three new scams from the words alone, and flagged none of the 12 ordinary messages. Your answers to the three quick questions add what the words can't show.</p>
+      </div>
+
+      <div class="card">
+        <h2>What it can't do</h2>
+        <ul class="plain-list">
+          <li>It can't tell you a message is safe. "No warning signs found" only means none of the common tricks appeared.</li>
+          <li>It can't see who really sent a message, check phone numbers, or visit links. It reads the words only.</li>
+          <li>It misses scams that start innocently, like a friendly "wrong number" chat that turns to money weeks later.</li>
+          <li>It's English-only for now, and its advice and reporting links are written mainly for the US.</li>
+          <li>It reads text, not screenshots or voice calls (you can type what a caller said).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Credits</h2>
+        <p class="small">Built for SafeSpace Hacks 2026. No third-party libraries, fonts, trackers or datasets: every example message is synthetic and was written for this project. Advice is based on public consumer guidance from the US Federal Trade Commission and national cyber-security agencies. AI assistance (Claude) was used while writing code and copy, and every rule and message was reviewed by the team.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>Second Look is a prototype that offers guidance, not guarantees. When in doubt, contact the organization yourself using details you already trust.</p>
+  </footer>
+
+  <script src="js/links.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/redact.js"></script>
+  <script src="js/recovery.js"></script>
+  <script src="js/samples.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
