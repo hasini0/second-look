@@ -253,5 +253,38 @@
     ["legit", "Your appointment at the DMV is confirmed for 21 Nov at 10:40 AM. Bring your ID and proof of address."],
   ].map(([label, text]) => ({ label, text }));
 
-  return { EXAMPLES, PRACTICE, EVAL, HOLDOUT, HOLDOUT2, HOLDOUT3 };
+  // Round 4 held-out set: written for Next Byte Hacks before the round-3 fixes, scored once
+  // before those fixes (counts only, misses not read) and once after. Frozen: do not tune against it.
+  const HOLDOUT4 = [
+    ["scam", "Jury Duty Office: you missed your summons on Oct 14. A warrant will be issued unless you pay the $500 bond today. Call Officer Grant at 555-0118."],
+    ["scam", "Hi grandpa, it's Josh. Please don't be mad. I got in a car accident and they're holding me. My lawyer will call you about bail, please don't tell mom and dad."],
+    ["scam", "Medicare: new plastic cards are being issued. To avoid losing coverage, confirm your Medicare number and date of birth at medicare-cardupdate.org"],
+    ["scam", "Your electricity will be disconnected in 45 minutes due to a missed payment. Pay immediately by calling our disconnection team at 555-0177."],
+    ["scam", "WARNING: Your computer is infected with 3 viruses. Do not close this window. Call Microsoft Certified Technicians at 1-555-0142 to remove them."],
+    ["scam", "Hello, I lost money to a crypto scam too, but a recovery agent got all of mine back for a small fee. I can introduce you."],
+    ["scam", "Hi! I'm Sophia, a wine importer in Singapore. My uncle taught me a trading strategy with 30% monthly returns. Want me to show you the app?"],
+    ["scam", "Invoice #88231 for your Geek Squad annual plan ($399.00) was processed today. To cancel and get a refund, contact us at 555-0123."],
+    ["scam", "The apartment is still available! I'm overseas for work so I can't show it, but if you send the $900 deposit by Zelle I'll mail you the keys."],
+    ["scam", "Netflix: we couldn't process your last payment. Update your billing information within 48 hours to keep watching: netflix-billing-help.com"],
+    ["scam", "This is the IRS. There is a lawsuit filed under your name for tax fraud. Press 1 now to speak to an officer or you will be arrested."],
+    ["scam", "We have a video of you from your webcam. Send $1,000 in Bitcoin within 48 hours or we will send it to all your contacts."],
+    ["scam", "Hi, this is Amazon security. Someone ordered an iPhone on your account. To cancel it, please install AnyDesk so we can secure your account."],
+    ["scam", "Hurricane relief: families need help now. Every gift card donation goes straight to victims. Reply to get the donation address."],
+    ["scam", "Congratulations, you've been selected for a $750 Walmart gift card! Pay $4.95 shipping to claim it: wal-mart-rewards.shop"],
+    // --- legitimate ---
+    ["legit", "Your jury service is scheduled for Dec 9 at the county courthouse. Check the court's official website the evening before for updates."],
+    ["legit", "Grandpa, I passed my driving test!! Can't wait to drive you to lunch on Sunday"],
+    ["legit", "Medicare open enrollment runs until Dec 7. Compare plans at the official Medicare website or call the number on your card."],
+    ["legit", "Planned maintenance: power will be off on Elm St on Nov 20 from 9am to 1pm. No action needed."],
+    ["legit", "Windows Update: restart required to finish installing updates. Restart now or schedule a time."],
+    ["legit", "Your Netflix plan will change to $15.49/month starting Dec 1. You can review your plan in Account settings."],
+    ["legit", "Hi, the apartment viewing is confirmed for Saturday at 11. Ring buzzer 4B when you arrive."],
+    ["legit", "Reminder: your tax documents are ready to download from your employer's payroll portal."],
+    ["legit", "Thanks for your donation to the food bank! Your receipt for $25 is attached for your records."],
+    ["legit", "Amazon: your package was delivered to the front door. Track details in the Amazon app."],
+    ["legit", "Hey, can you send me the photos from the trip when you get a chance? No rush"],
+    ["legit", "Your library book 'The Overstory' is due back on Nov 22. Renew it online or at the front desk."],
+  ].map(([label, text]) => ({ label, text }));
+
+  return { EXAMPLES, PRACTICE, EVAL, HOLDOUT, HOLDOUT2, HOLDOUT3, HOLDOUT4 };
 });

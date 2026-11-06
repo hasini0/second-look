@@ -3,7 +3,7 @@
 // Usage: node eval/run.js [--verbose]
 "use strict";
 const { analyze } = require("../js/analyzer.js");
-const { EVAL, PRACTICE, HOLDOUT, HOLDOUT2, HOLDOUT3 } = require("../js/samples.js");
+const { EVAL, PRACTICE, HOLDOUT, HOLDOUT2, HOLDOUT3, HOLDOUT4 } = require("../js/samples.js");
 
 const verbose = process.argv.includes("--verbose");
 const tuning = EVAL.concat(
@@ -12,7 +12,8 @@ const tuning = EVAL.concat(
 report("Tuning set (rules were adjusted against these)", tuning);
 report("Round-1 held-out (scored once at 36% / 10%, then used to fix gaps)", HOLDOUT);
 report("Round-2 held-out (scored once at 40% / 8%, then used to fix gaps)", HOLDOUT2);
-report("Round-3 held-out (frozen, never tuned on: the number we quote)", HOLDOUT3);
+report("Round-3 held-out (scored once at 67% / 0%, then used to fix gaps)", HOLDOUT3);
+report("Round-4 held-out (frozen, never tuned on: the number we quote)", HOLDOUT4);
 
 function report(title, rows) {
 

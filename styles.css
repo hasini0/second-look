@@ -340,4 +340,28 @@ fieldset.card > legend + * { clear: both; }
 @media (max-width: 480px) {
   .input-actions .btn.primary { flex: 1 1 100%; justify-content: center; }
   .input-actions .btn.ghost { flex: 1 1 0; justify-content: center; min-width: 0; }
+  .input-actions #qr-open { flex: 1 1 100%; }
 }
+
+/* "Why this level?" score breakdown */
+.why { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 10px; }
+.why summary { cursor: pointer; font-weight: 600; color: var(--ink-2); }
+.why-list { list-style: none; padding: 0; margin: 10px 0 6px; display: grid; gap: 4px; }
+.why-list li { display: grid; grid-template-columns: 4.2em 1fr; gap: 8px; font-size: .94rem; }
+.why-list .pts { font-family: var(--mono); font-weight: 700; text-align: right; }
+.why-list .total { border-top: 1px dashed var(--line); padding-top: 4px; font-weight: 700; }
+.why-scale { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 8px 0 4px; font-size: .8rem; text-align: center; }
+.why-scale span { padding: 4px 2px; border-radius: 8px; background: var(--surface-2); color: var(--ink-2); }
+.why-scale span.on { outline: 2px solid currentColor; font-weight: 700; color: var(--ink); }
+
+/* QR code X-ray */
+.qr-panel .row { margin-bottom: 4px; }
+.qr-panel label.btn { cursor: pointer; }
+.qr-video { display: block; width: 100%; max-width: 420px; aspect-ratio: 1; object-fit: cover; border-radius: 12px; margin: 12px 0 4px; background: #000; }
+.qr-video[hidden] { display: none; }
+.qr-panel .status.warn { color: var(--some); }
+.qr-card dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 10px 0 0; font-size: .94rem; }
+.qr-card dt { color: var(--ink-2); }
+.qr-card dd { margin: 0; font-family: var(--mono); word-break: break-all; }
+.qr-card.payment { border: 2px solid color-mix(in srgb, var(--strong) 45%, transparent); background: var(--strong-bg); }
+.qr-card.payment h2 { color: var(--strong); }

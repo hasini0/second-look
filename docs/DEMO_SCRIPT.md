@@ -1,40 +1,46 @@
-# Demo video script (about 2.5 minutes)
+# Demo video script (about 2:45)
 
-Record at phone width or desktop. Speak slowly.
+Next Byte's rules ask for 2–5 minutes covering **what it does, how it works and the problem it solves**; the overview page says 1–3 minutes. Aim for 2:30–3:00 to satisfy both.
 
-**0:00 – The problem (15s)**
-"This is the message you hesitate to click." Show the fake PayPal example in a phone. "Scams don't beat people with technology. They beat them with a feeling: a deadline, a threat. Second Look is a calm second opinion, and it runs entirely on your device."
+Record at desktop width in Chrome (the QR scanner needs Chrome or Edge). Speak slowly. Before recording, open `docs/demo-qr/fake-refund-upi.png` on your phone screen (or print it), so you can hold it up to the camera.
 
-**0:15 – Check a message (45s)**
+**0:00 – The problem (20s)**
+"Scams don't beat people with technology. They beat them with a feeling: a deadline, a threat, a 'Hi Mum, new number'. And now they're on QR stickers on parking meters too. Second Look is a calm second opinion for the message or QR code you hesitate to trust, and it runs entirely on your device."
+
+**0:20 – Check a message (40s)**
 Examples → *Fake PayPal alert* → **Take a second look**.
 - Verdict: Strong warning signs, in plain words.
-- "What to do now": point at step 1.
+- Open **Why this level?** "No black box: every point, and the one sign that decided it: the link disguises where it goes."
 - Scroll to the highlights. Tap **Scares you** to show it jumping to the words.
 - Link X-ray: "It looks like PayPal, but it really goes to **account-verify.top**. We never open the link."
 
-**1:00 – Honest uncertainty (25s)**
+**1:00 – QR code X-ray (35s)** *(the new feature: spend time here)*
+**Scan a QR code** → **Use camera** → hold up the fake refund code.
+- "Someone buying your old sofa says: scan this to receive the payment. Second Look reads the code on this device…"
+- QR card: "**If you scanned it, it would send ₹4,999 to 'Refund Desk'.** You never scan a code to receive money."
+- Then **Choose a photo** → `fake-parking-meter.png`: "A parking-meter sticker: it pretends to be PayPal on a .top website."
+
+**1:35 – Honest uncertainty (20s)**
 Examples → *Ordinary message* → "No common warning signs found… **that doesn't mean it's safe.**"
 Answer the three questions: Not expecting it → No → Yes. "Your answers can raise the warning, never lower it."
 
-**1:25 – Ask someone I trust (15s)**
-Examples → *"Hi Mum" on a new number* → scroll to *Ask someone I trust*. "Codes, numbers and names are removed, so you can safely ask your family."
+**1:55 – Ask someone I trust + Already responded (30s)**
+Examples → *"Hi Mum" on a new number* → scroll to *Ask someone I trust*: "Codes, numbers and names are removed, so you can safely ask your family."
+**Already responded?** → tick *I shared a security code* and *I sent money*: "An ordered plan: next 15 minutes, today, this week. Saved only on this device."
 
-**1:40 – Already responded? (25s)**
-Tick *I shared a security code* and *I sent money*. "An ordered plan: what to do in the next 15 minutes, today, and this week. Saved only on this device."
+**2:25 – How it works and trust (20s)**
+How it works tab: "Plain JavaScript, no libraries, no server. The browser itself blocks any outgoing data: network requests stay at 0. QR codes are read with Chrome's built-in scanner."
+Evaluation table: "We test on new messages we've never tuned on. Our frozen round catches about three in four scams, with one false alarm in twelve, and we show you that honestly."
 
-**2:05 – Trust (25s)**
-How it works tab: "Network requests since this page loaded: 0. The browser itself blocks any outgoing data." Turn on airplane mode and check a message: it still works.
-Show the evaluation table: "Our first blind test caught only 36% of new scams, so we rebuilt the rules. On a frozen test it catches about two in three, with no false alarms. It can't catch everything, and it tells you that."
-
-**2:30 – Close (5s)**
-"Second Look: pause, understand, check. You don't have to solve every scam. Just make this moment a little safer."
+**2:45 – Close (5s)**
+"Second Look: pause, understand, check. Just make this moment a little safer."
 
 ## Screenshots to capture for Devpost
-1. PayPal result: verdict + "What to do now"
-2. Highlighted message + tactic cards
-3. Link X-ray card
-4. "Ask someone I trust" with the "Hidden:" chips
-5. Recovery plan with a few steps ticked
-6. Practice feedback card
+1. PayPal result: verdict + "Why this level?" open
+2. QR card for the fake UPI refund (red "would send money" card)
+3. Highlighted message + tactic cards
+4. Link X-ray card
+5. "Ask someone I trust" with the "Hidden:" chips
+6. Recovery plan with a few steps ticked
 7. How it works: request counter + evaluation table
 8. Phone-width view in dark mode

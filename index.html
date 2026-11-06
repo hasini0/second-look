@@ -58,7 +58,21 @@
             <option value="">Examples…</option>
           </select>
           <button id="clear" class="btn ghost" type="button">Clear</button>
+          <button id="qr-open" class="btn ghost" type="button" aria-expanded="false" aria-controls="qr-panel">Scan a QR code</button>
         </div>
+      </div>
+
+      <div id="qr-panel" class="card qr-panel" hidden>
+        <h2>Check a QR code before you scan it</h2>
+        <p class="muted small">Stickers on parking meters, parcels, posters and "scan to receive money" requests can hide a fake website or a payment <em>from</em> you. Second Look reads the code on this device and shows what it would do. It never opens it.</p>
+        <div class="row">
+          <button id="qr-camera" class="btn primary" type="button">Use camera</button>
+          <label class="btn ghost" for="qr-file">Choose a photo</label>
+          <input id="qr-file" class="visually-hidden" type="file" accept="image/*">
+          <button id="qr-stop" class="btn ghost" type="button" hidden>Stop camera</button>
+        </div>
+        <video id="qr-video" class="qr-video" playsinline muted hidden></video>
+        <p id="qr-status" class="status" role="status"></p>
       </div>
 
       <div id="results" class="results" aria-live="polite"></div>
@@ -118,7 +132,7 @@
         <p>We wrote labelled test messages (all synthetic) and measured the rules in rounds. Each round, a brand-new set of messages was scored once, <em>before</em> we looked at what it missed. The first round showed the rules were overfit to our own examples (only 36% of new scams caught), so we rebuilt them around the structure of scams rather than specific phrases.</p>
         <div id="eval-table"></div>
         <button id="run-eval" class="btn ghost" type="button">Re-run the test on this device</button>
-        <p class="muted small">The number we stand behind is the last round, scored once and never tuned: it catches about two in three new scams from the words alone, and flagged none of the 12 ordinary messages. Your answers to the three quick questions add what the words can't show.</p>
+        <p class="muted small">The number we stand behind is the last round, scored once and never tuned: it catches about three in four new scams from the words alone, and wrongly flagged one of the 12 ordinary messages. Your answers to the three quick questions add what the words can't show.</p>
       </div>
 
       <div class="card">
@@ -128,13 +142,14 @@
           <li>It can't see who really sent a message, check phone numbers, or visit links. It reads the words only.</li>
           <li>It misses scams that start innocently, like a friendly "wrong number" chat that turns to money weeks later.</li>
           <li>It's English-only for now, and its advice and reporting links are written mainly for the US.</li>
-          <li>It reads text, not screenshots or voice calls (you can type what a caller said).</li>
+          <li>It reads text and QR codes, not screenshots or voice calls (you can type what a caller said).</li>
+          <li>QR reading uses your browser's built-in scanner, which Chrome and Edge have on Android, Mac and ChromeOS. Elsewhere you can type the address your camera shows.</li>
         </ul>
       </div>
 
       <div class="card">
         <h2>Credits</h2>
-        <p class="small">Built for SafeSpace Hacks 2026. No third-party libraries, fonts, trackers or datasets: every example message is synthetic and was written for this project. Advice is based on public consumer guidance from the US Federal Trade Commission and national cyber-security agencies. AI assistance (Claude) was used while writing code and copy, and every rule and message was reviewed by the team.</p>
+        <p class="small">Built for Next Byte Hacks V5. No third-party libraries, fonts, trackers or datasets: every example message is synthetic and was written for this project. Advice is based on public consumer guidance from the US Federal Trade Commission and national cyber-security agencies. AI assistance (Claude) was used while writing code and copy, and every rule and message was reviewed by the team.</p>
       </div>
     </section>
   </main>
@@ -148,6 +163,7 @@
   <script src="js/redact.js"></script>
   <script src="js/recovery.js"></script>
   <script src="js/samples.js"></script>
+  <script src="js/qr.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

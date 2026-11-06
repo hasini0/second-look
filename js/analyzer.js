@@ -55,8 +55,9 @@
       id: "credentials", name: "Asks for private information", weight: 3, icon: "🪪",
       plain: "Your password, card details and ID numbers are what scammers are after. Real companies don't ask you to confirm them by message or through a link.",
       patterns: [
-        /\b(?:confirm|verify|update|validate|re-?enter|provide|enter|send|submit|give us|share)\b\s+(?:your\s+|us\s+your\s+)?(?:(?:bank|banking|online|account|email|full)\s+)?(?:password|log-?in(?: details| info)?|credentials|account (?:details|information|info)|bank(?:ing)? (?:details|information|info)|card (?:details|number|info)|payment (?:details|information|info|method)|billing (?:details|information|info)|ssn|social security(?: number)?|date of birth|identity|personal (?:details|information)|pin|(?:medicare|medicaid|insurance|member|policy|passport|driver'?s licen[cs]e|tax) (?:number|id))\b/gi,
+        /\b(?:confirm|verify|update|validate|re-?enter|provide|enter|send|submit|give us|share)\b\s+(?:your\s+|us\s+your\s+)?(?:(?:bank|banking|online|account|email|full)\s+){0,2}(?:password|user ?name|log-?in(?: details| info)?|credentials|account (?:details|information|info)|bank(?:ing)? (?:details|information|info)|card (?:details|number|info)|payment (?:details|information|info|method)|billing (?:details|information|info)|ssn|social security(?: number)?|date of birth|identity|personal (?:details|information)|pin|(?:medicare|medicaid|insurance|member|policy|passport|driver'?s licen[cs]e|tax) (?:number|id))\b/gi,
         /\b(?:ssn|social security number|mother'?s maiden name|routing number)\b/gi,
+        /\b(?:all|every) (?:users?|customers?|members?|accounts?) (?:must|need to|are required to) (?:re-?verify|re-?confirm|re-?validate|update)\b|\bmust re-?verify\b/gi,
       ],
     },
     {
@@ -74,6 +75,15 @@
         /\b(?:changed|switched|new|updated|different) (?:banks?|bank (?:account|details)|account details|payment (?:details|instructions)|account number)\b|\bto the new account\b/gi,
         /\b(?:deposit|cash) (?:the|this|my) (?:attached )?(?:check|cheque)\b|\bprotected account\b|\bsafe (?:account|wallet)\b/gi,
         /\b(?:verify|confirm|upgrade) your (?:email|account) to (?:receive|accept|release)\b/gi,
+      ],
+    },
+    {
+      id: "overpay", name: "Overpays, then wants the difference back", weight: 3.5, icon: "🔁",
+      plain: "Paying you too much and asking you to send back the extra is a classic trick. Their check or payment bounces days later, but the money you sent is gone for good.",
+      patterns: [
+        /\b(?:cashier'?s check|money order|certified check)[^.!?\n]{0,40}\b(?:more than|over|extra|above)\b/gi,
+        /\bsend (?:me |us |back )?(?:the )?(?:difference|extra|rest|balance|change)(?: back)?\b/gi,
+        /\b(?:overpaid|overpayment|paid (?:you )?too much)\b/gi,
       ],
     },
     {
@@ -104,6 +114,7 @@
         /\bwork(?:ing)? from home\b|\b(?:part[- ]time|remote|online) (?:job|position|role|work)\b/gi,
         /\b(?:guaranteed|high|daily|fixed) (?:returns?|profits?|income)\b|\binvestment opportunity\b|\bdouble your (?:money|bitcoin|crypto|investment)\b/gi,
         /\b(?:simple|easy) (?:online )?tasks?\b|\byou(?:'ve| have) been (?:hired|recommended|shortlisted)\b/gi,
+        /\bdata entry (?:job|role|position|work)\b|\b(?:found|saw|came across|reviewed) your (?:resume|cv|profile)\b/gi,
       ],
     },
     {
@@ -114,6 +125,7 @@
         /\b(?:account|card|access|service|number|profile|license|licence|wallet|order|payment)\s+(?:is |was )?(?:permanently\s+)?(?:suspended|locked|blocked|disabled|frozen|terminated|deactivated|restricted|on hold|flagged|compromised|under review)\b/gi,
         /\b(?:legal action|arrest(?:ed)?|warrant|lawsuit|prosecut(?:e|ed|ion)|deport(?:ed|ation)?|jail|criminal charges)\b/gi,
         /\b(?:fined|penalt(?:y|ies)|late fees?)\b/gi,
+        /\bfailure to (?:do so|comply|respond|verify|act) (?:will|may|could) result in\b/gi,
         /\b(?:suspicious|unusual|unauthori[sz]ed) (?:activity|sign-?in|log-?in|transaction|charge|purchase|access)\b/gi,
       ],
     },
@@ -125,6 +137,7 @@
         /\bunclaimed (?:funds|money|refund|package)\b|\bfree (?:gift|iphone|money|cash|vacation|trip)\b|\bclaim (?:your|it|now)\b/gi,
         /\b(?:pre-?approved|approved instantly|instant approval|guaranteed approval|no credit check)\b/gi,
         /\b(?:tax |tuition |overpayment )?(?:refund|rebate) (?:of \$?[\d,.]+ )?(?:is |has been )?(?:pending|available|ready|waiting|approved)\b|\breward points? (?:expire|expiring)\b/gi,
+        /\b(?:answer|complete|take|fill (?:out|in)) (?:a |our |this |the )?(?:\d+[- ](?:second|minute) |short |quick |brief )?survey\b|\b(?:membership|loyalty|customer) reward\b/gi,
       ],
     },
     {
@@ -159,6 +172,7 @@
       patterns: [
         /\b(?:message|text|contact|add|reach|chat|talk|continue|move|dm|find)\b[^.!?\n]{0,15}\b(?:on|via|over|to) (?:whatsapp|telegram|signal|wechat|line|kik|google chat|hangouts|snapchat)\b/gi,
         /\b(?:telegram|whatsapp)\s*(?:me|@\w+|\+\d)/gi,
+        /\b(?:download|install|get) (?:the )?(?:signal|telegram|whatsapp|wechat) app\b/gi,
       ],
     },
     {
@@ -197,14 +211,20 @@
     },
   ];
 
+  // Not found in the words: set when a scanned QR code would send money (see js/qr.js).
+  const QR_PAYMENT = {
+    id: "qrpay", name: "QR code that sends money", weight: 5, icon: "📲",
+    plain: "Scanning this code starts a payment from you. You never need to scan a code or enter your PIN to receive money, so anyone who says you do is trying to take it.",
+  };
+
   // How each tactic reads inside a sentence: "It rushes you and asks for a security code."
   const SAYS = {
     code: "asks for a security code", remote: "wants control of your device", payment: "asks for a kind of payment that's hard to undo",
     credentials: "asks for private information", money: "asks you to send or move money", newdetails: "says payment details have changed",
-    secrecy: "asks you to keep it secret", family: "comes from a \"family member\" on a new number", job: "offers easy money",
+    overpay: "overpays and wants the difference back", secrecy: "asks you to keep it secret", family: "comes from a \"family member\" on a new number", job: "offers easy money",
     threat: "tries to scare you", prize: "promises something too good to be true", delivery: "claims there's a problem with a package",
     debt: "says you owe money", urgency: "rushes you", offplatform: "tries to move you to another app", callnumber: "gives you its own number to call",
-    curiosity: "uses curiosity bait", stranger: "reads like a stranger getting personal", click: "pushes you to tap a link", generic: "doesn't use your name",
+    qrpay: "is a QR code that would send money from you", curiosity: "uses curiosity bait", stranger: "reads like a stranger getting personal", click: "pushes you to tap a link", generic: "doesn't use your name",
   };
 
   // Who the message claims to be from, and how to check that independently.
@@ -223,6 +243,7 @@
     government: "Government agencies don't demand payment by phone, text or gift card, and don't threaten arrest by message. Find the agency's number on its official .gov site.",
     tech: "Open the company's app or type its website yourself and check your account for alerts. If there's nothing there, the message wasn't real.",
     family: "Call the person on the number you already have saved, or ask a family member. Ask something only they would know.",
+    qr: "QR codes on parking meters, parcels, posters and menus can be stickers placed over the real one. Pay or log in through the official app or by typing the website yourself.",
     employer: "Look up the company yourself and contact its official careers page. Real employers never ask you to pay to start a job.",
     generic: "Contact the person or organization using details you find yourself (the official app, website, or a number you already trust), never the ones in this message.",
   };
@@ -231,6 +252,9 @@
     { re: /\b(?:never|don'?t|do not)\s+share\s+(?:this|your|the)\s+(?:code|otp|pin|password)\b/i, text: "Tells you not to share a code. Real security messages do this, though scammers sometimes copy it." },
     { re: /\b(?:number|phone number) on the back of your card\b|\bofficial app\b/i, text: "Points you to the official app or the number on your card instead of a link." },
   ];
+
+  // Points needed for each level (see "Why this level?" in the app).
+  const THRESHOLDS = { some: 2.5, strong: 6 };
 
   function collectMatches(text, tactic) {
     const found = [];
@@ -276,12 +300,17 @@
 
     const tactics = [];
     const highlights = [];
+    const breakdown = []; // every point added, so the person can see exactly why they got this level
     let score = 0;
+    const add = (points, label) => {
+      score += points;
+      breakdown.push({ points, label });
+    };
 
     for (const t of TACTICS) {
       const matches = collectMatches(text, t);
       if (!matches.length) continue;
-      score += t.weight;
+      add(t.weight, t.name);
       const quotes = [...new Set(matches.map((m) => m.text.trim()))].slice(0, 3);
       tactics.push({ id: t.id, name: t.name, icon: t.icon, plain: t.plain, weight: t.weight, quotes });
       for (const m of matches) highlights.push({ start: m.start, end: m.end, kind: "tactic", id: t.id });
@@ -294,22 +323,31 @@
       linkScore = Math.max(linkScore, worst);
       highlights.push({ start: l.start, end: l.end, kind: "link", id: l.official ? "link-official" : worst >= 2 ? "link-risky" : "link" });
     }
-    score += Math.min(linkScore, 6);
+    if (linkScore > 0) add(Math.min(linkScore, 6), "Risky link (worst one, up to 6 points)");
     // A link plus any pressure tactic is the standard scam recipe.
-    if (foundLinks.length && tactics.some((t) => ["urgency", "threat", "prize", "delivery", "debt", "credentials", "curiosity"].includes(t.id))) score += 1;
+    if (foundLinks.length && tactics.some((t) => ["urgency", "threat", "prize", "delivery", "debt", "credentials", "curiosity"].includes(t.id))) add(1, "A link together with pressure");
+
+    if (context.qr && context.qr.kind === "payment") {
+      add(QR_PAYMENT.weight, QR_PAYMENT.name);
+      tactics.push({ ...QR_PAYMENT, quotes: [context.qr.summary] });
+    }
 
     const ids = new Set(tactics.map((t) => t.id));
     const claimsEarly = CLAIMS.filter((c) => c.re.test(text)).map((c) => c.kind);
     // A phone number in a message "from" a bank or big company is the fake-refund / fake-fraud-desk script.
-    if (ids.has("callnumber") && claimsEarly.some((k) => k === "bank" || k === "tech" || k === "government")) score += 1.5;
+    if (ids.has("callnumber") && claimsEarly.some((k) => k === "bank" || k === "tech" || k === "government")) add(1.5, "Its own phone number in a message from a bank or company");
+    // Some signs are serious enough on their own, whatever the score.
+    const disguisedLink = foundLinks.some((l) => l.findings.some((f) => f.id === "brand-mismatch" || f.id === "punycode" || f.id === "at-sign"));
     const critical =
-      ids.has("code") || ids.has("remote") ||
-      (ids.has("payment") && (ids.has("urgency") || ids.has("threat") || ids.has("secrecy") || ids.has("family"))) ||
-      foundLinks.some((l) => l.findings.some((f) => f.id === "brand-mismatch" || f.id === "punycode" || f.id === "at-sign"));
+      ids.has("code") ? "It asks for a security code" :
+      ids.has("remote") ? "It wants control of your device" :
+      ids.has("qrpay") ? "The QR code would send money from you" :
+      ids.has("payment") && (ids.has("urgency") || ids.has("threat") || ids.has("secrecy") || ids.has("family")) ? "It wants a hard-to-undo payment, under pressure" :
+      disguisedLink ? "A link disguises where it really goes" : null;
 
     let level;
-    if (critical || score >= 6) level = "strong";
-    else if (score >= 2.5) level = "some";
+    if (critical || score >= THRESHOLDS.strong) level = "strong";
+    else if (score >= THRESHOLDS.some) level = "some";
     else level = "few";
 
     // The person knows things the text can't show. Their answers can raise concern, never lower it:
@@ -329,6 +367,7 @@
     const claims = [];
     for (const c of CLAIMS) if (c.re.test(text)) claims.push(c.kind);
     for (const l of foundLinks) if (l.brand && !l.official && !claims.includes("tech")) claims.push("tech");
+    if (context.qr) claims.unshift("qr");
     const verify = (claims.length ? claims : ["generic"]).map((k) => ({ kind: k, text: VERIFY[k] }));
     if (claims.length) verify.push({ kind: "generic", text: VERIFY.generic });
 
@@ -343,6 +382,7 @@
     if (ids.has("remote")) next.push("Don't install anything they suggest. If you already did, disconnect from the internet and uninstall it.");
     if (ids.has("payment")) next.push("Don't pay with gift cards, crypto or wire transfer. No real business or agency requires this.");
     if (ids.has("family")) next.push("Call your family member on the number you already have saved.");
+    if (ids.has("qrpay")) next.push("Don't approve this payment or enter your PIN. Receiving money never needs a scan or a PIN.");
     next.push(verify[0].text);
     if (level !== "few") next.push("Once you've checked, block the sender and delete the message. You can also forward scam texts to 7726 (SPAM) in the US, UK and Canada.");
 
@@ -371,6 +411,7 @@
 
     return {
       level, score: Math.round(score * 10) / 10, summary, contextNotes,
+      breakdown, critical, thresholds: THRESHOLDS,
       tactics, links: foundLinks, claims, verify, next, protective, caveats,
       highlights: mergeHighlights(highlights),
     };

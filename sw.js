@@ -1,8 +1,8 @@
 /* Second Look — offline support. Caches the app's own files; never touches anything else. */
-const VERSION = "second-look-v1";
+const VERSION = "second-look-v2";
 const FILES = [
   "./", "./index.html", "./styles.css", "./manifest.webmanifest",
-  "./js/links.js", "./js/analyzer.js", "./js/redact.js", "./js/recovery.js", "./js/samples.js", "./js/app.js",
+  "./js/links.js", "./js/analyzer.js", "./js/redact.js", "./js/recovery.js", "./js/samples.js", "./js/qr.js", "./js/app.js",
   "./icons/icon.svg", "./icons/icon-192.png", "./icons/icon-512.png",
 ];
 

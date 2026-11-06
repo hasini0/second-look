@@ -62,6 +62,7 @@
   const msg = $("#msg");
   const results = $("#results");
   let ctx = { expected: null, knownSender: null, asks: null };
+  let qrInfo = null; // what a scanned QR code would do (js/qr.js), while its contents are in the box
   let lastText = "";
   let shareDraft = null;
 
@@ -75,6 +76,7 @@
     if (!e.target.value) return;
     msg.value = e.target.value;
     e.target.value = "";
+    qrInfo = null;
     runCheck(true);
   });
   $("#check").addEventListener("click", () => runCheck(true));
@@ -82,8 +84,10 @@
     msg.value = "";
     results.innerHTML = "";
     lastText = "";
+    qrInfo = null;
     msg.focus();
   });
+  msg.addEventListener("input", () => (qrInfo = null));
   msg.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) runCheck(true);
   });
@@ -102,7 +106,7 @@
     lastText = text;
     let report;
     try {
-      report = SL.analyzer.analyze(text, ctx);
+      report = SL.analyzer.analyze(text, { ...ctx, qr: qrInfo });
     } catch (err) {
       // Fail visibly and safely rather than showing a misleading result.
       console.error(err);
@@ -143,11 +147,24 @@
           ${r.level === "few" ? "<p><strong>That doesn't mean it's safe.</strong> If you weren't expecting it, check another way.</p>" : ""}
           ${r.contextNotes.map((n) => `<p class="context-note">${esc(n)}</p>`).join("")}
         </div>
+        ${whyHTML(r)}
         <div class="verdict-actions no-print">
           ${speech.available ? '<button class="btn ghost small" type="button" id="speak">🔊 Read aloud</button>' : ""}
           <a class="btn ghost small" href="#share-card">Ask someone I trust</a>
         </div>
       </section>`);
+
+    // 1b. What the scanned QR code would do
+    if (qrInfo) {
+      parts.push(`
+        <section class="card qr-card ${qrInfo.kind === "payment" ? "payment" : ""}" aria-labelledby="qr-h">
+          <h2 id="qr-h">QR code, X-rayed <span class="muted small">(not opened)</span></h2>
+          <p><strong>If you scanned it, it would:</strong> ${esc(qrInfo.summary)}.</p>
+          ${qrInfo.kind === "payment" ? "<p>This is a request to <strong>send</strong> money. You never scan a code to receive money.</p>" : ""}
+          ${qrInfo.kind === "wifi" ? "<p class=\"small\">Joining a network you don't know lets its owner see where you browse. Only join Wi-Fi you trust.</p>" : ""}
+          ${qrInfo.details.length ? `<dl>${qrInfo.details.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : ""}
+        </section>`);
+    }
 
     // 2. What to do now
     parts.push(`
@@ -266,6 +283,27 @@
     }
   }
 
+  // "Why this level?": every point the engine added, the thresholds, and any sign that decides it alone.
+  function whyHTML(r) {
+    if (!r.breakdown) return "";
+    const total = r.breakdown.reduce((a, b) => a + b.points, 0);
+    const fmt = (n) => "+" + (Math.round(n * 10) / 10);
+    return `
+      <details class="why no-print">
+        <summary>Why this level?</summary>
+        ${r.breakdown.length ? `<ul class="why-list">
+          ${r.breakdown.map((b) => `<li><span class="pts">${fmt(b.points)}</span><span>${esc(b.label)}</span></li>`).join("")}
+          <li class="total"><span class="pts">${Math.round(total * 10) / 10}</span><span>points in total</span></li>
+        </ul>` : "<p class=\"small\">No warning signs added any points.</p>"}
+        <div class="why-scale" aria-hidden="true">
+          <span class="${r.level === "few" ? "on" : ""}">Few signs<br>under ${r.thresholds.some}</span>
+          <span class="${r.level === "some" ? "on" : ""}">Some signs<br>${r.thresholds.some}+</span>
+          <span class="${r.level === "strong" ? "on" : ""}">Strong signs<br>${r.thresholds.strong}+</span>
+        </div>
+        <p class="small muted m0">Some signs are serious enough on their own.${r.critical ? ` <strong>Here: ${esc(r.critical)}.</strong>` : ""} Your answers to the three questions can also raise the level.</p>
+      </details>`;
+  }
+
   function wireResults(r) {
     for (const btn of $$(".tactic", results)) {
       btn.addEventListener("click", () => {
@@ -308,6 +346,84 @@
     }
     const speak = $("#speak");
     if (speak) speak.addEventListener("click", () => speech.say([SL.analyzer.HEADLINES[r.level] + ".", r.summary, "What to do now.", ...r.next].join(" ")));
+  }
+
+  /* ================= QR code X-ray (decoded on this device) ================= */
+  const qrUI = { stream: null, timer: null };
+  const qrStatus = (text, warn) => {
+    $("#qr-status").textContent = text;
+    $("#qr-status").classList.toggle("warn", !!warn);
+  };
+
+  $("#qr-open").addEventListener("click", async () => {
+    const panel = $("#qr-panel");
+    panel.hidden = !panel.hidden;
+    $("#qr-open").setAttribute("aria-expanded", String(!panel.hidden));
+    if (panel.hidden) return stopCamera();
+    if (!(await SL.qr.isSupported())) {
+      $("#qr-camera").disabled = true;
+      $('label[for="qr-file"]').hidden = true;
+      qrStatus("This browser can't read QR codes by itself (Chrome and Edge can, on Android, Mac and ChromeOS). Instead, point your phone's camera at the code, and when it shows the address, type it in the box above without opening it.", true);
+    }
+  });
+
+  function showQr(raw) {
+    stopCamera();
+    qrInfo = SL.qr.parse(raw);
+    msg.value = qrInfo.text || `QR code: ${qrInfo.summary}`;
+    lastText = "";
+    qrStatus("Read the code. Here's what it would do.");
+    runCheck(true); // qrInfo stays until the person edits the text (see the "input" listener)
+  }
+
+  $("#qr-file").addEventListener("change", async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const raw = await SL.qr.decode(await createImageBitmap(file));
+      if (raw) showQr(raw);
+      else qrStatus("No QR code found in that photo. Try a closer, sharper picture.", true);
+    } catch (err) {
+      qrStatus("Couldn't read that photo. Try another picture.", true);
+    }
+  });
+
+  $("#qr-camera").addEventListener("click", async () => {
+    const video = $("#qr-video");
+    try {
+      qrUI.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+    } catch (err) {
+      return qrStatus("Camera not available. You can choose a photo of the code instead.", true);
+    }
+    video.srcObject = qrUI.stream;
+    video.hidden = false;
+    $("#qr-stop").hidden = false;
+    await video.play();
+    qrStatus("Point the camera at the QR code. Nothing is recorded or sent.");
+    const scan = async () => {
+      if (!qrUI.stream) return;
+      try {
+        const raw = await SL.qr.decode(video);
+        if (raw) return showQr(raw);
+      } catch (err) { /* frame not ready yet */ }
+      qrUI.timer = setTimeout(scan, 250);
+    };
+    scan();
+  });
+
+  $("#qr-stop").addEventListener("click", () => {
+    stopCamera();
+    qrStatus("");
+  });
+
+  function stopCamera() {
+    clearTimeout(qrUI.timer);
+    if (qrUI.stream) qrUI.stream.getTracks().forEach((t) => t.stop());
+    qrUI.stream = null;
+    $("#qr-video").hidden = true;
+    $("#qr-video").srcObject = null;
+    $("#qr-stop").hidden = true;
   }
 
   /* ================= read aloud (on-device voices only) ================= */
@@ -511,7 +627,8 @@
       { name: "Tuning set", note: "Rules were built against these", s: score(tuning) },
       { name: "Round 1 (new messages)", note: "First blind score: 36% caught, 10% false alarms. Then used to fix gaps.", s: score(S.HOLDOUT) },
       { name: "Round 2 (new messages)", note: "First blind score: 40% caught, 8% false alarms. Then used to fix gaps.", s: score(S.HOLDOUT2) },
-      { name: "Round 3 (new messages)", note: "Scored once, frozen, never tuned. This is the honest number.", s: score(S.HOLDOUT3), quoted: true },
+      { name: "Round 3 (new messages)", note: "First blind score: 67% caught, 0% false alarms. Then used to fix gaps.", s: score(S.HOLDOUT3) },
+      { name: "Round 4 (new messages)", note: "Scored once after the round-3 fixes, frozen, never tuned. This is the honest number.", s: score(S.HOLDOUT4), quoted: true },
     ];
     const pct = (a, b) => Math.round((100 * a) / b) + "%";
     $("#eval-table").innerHTML = `
@@ -524,7 +641,7 @@
             <td class="num">${r.s.fp}/${r.s.legit} (${pct(r.s.fp, r.s.legit)})</td>
           </tr>`).join("")}</tbody>
       </table></div>
-      ${flash ? `<p class="status" role="status">Re-ran ${tuning.length + S.HOLDOUT.length + S.HOLDOUT2.length + S.HOLDOUT3.length} messages on this device just now.</p>` : ""}`;
+      ${flash ? `<p class="status" role="status">Re-ran ${tuning.length + S.HOLDOUT.length + S.HOLDOUT2.length + S.HOLDOUT3.length + S.HOLDOUT4.length} messages on this device just now.</p>` : ""}`;
   }
 
   /* ================= privacy proof & offline ================= */

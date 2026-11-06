@@ -6,7 +6,7 @@
 Second Look
 
 ## Short pitch (tagline)
-A calm second opinion for the message you hesitate to click. It explains the scam tactics in plain words, X-rays links without opening them, and helps you act, all without your message ever leaving your device.
+A calm second opinion for the message or QR code you hesitate to trust. It explains the scam tactics in plain words, X-rays links and QR codes without opening them, and helps you act, all without anything leaving your device.
 
 ## Team
 [Your name(s), and everyone who contributed]
@@ -34,20 +34,25 @@ Everyday people who get a suspicious text, email or DM, especially those most ta
 - **Tells you what to do now**, in order, and **how to verify** based on who the message claims to be (bank, delivery, government, tech company, family, employer).
 - **Asks three questions only you can answer:** were you expecting it, do you know the sender, does it ask you to do something? The text can't know these. Your answers can **raise** the warning level, never lower it, because a known contact's account can be hacked.
 
-**2. Ask someone I trust.** One tap creates a copy for a friend or family member with your **codes, card and account numbers, phone numbers, emails, names, addresses and link tracking IDs removed**. You can edit it before sending. Asking a person is one of the best defences, and this makes it safe to do.
+- **Shows its working ("Why this level?").** Every point each warning sign added, the thresholds, and the one serious sign that decided it, if there was one. No black box.
 
-**3. "Already responded?"** Tick what happened (shared a code, sent money, gave remote access, paid with gift cards…) and get an **ordered recovery plan**: *Right now (next 15 minutes)*, *Today*, *Over the next few days*. It's deduplicated, saved only on your device, and printable. It opens with "this happens to careful, smart people" because shame stops people from acting fast.
+**2. Check a QR code before you scan it.** Fake QR stickers on parking meters, parcel notes and posters lead to lookalike payment pages, and "scan this to receive your refund" codes actually start a payment *from* you. Point the camera at a code or pick a photo. Second Look decodes it **on your device** with the browser's built-in scanner (no library, no upload) and shows what it would do: open a website (then X-rayed like any link), **send money** (UPI, Bitcoin and other payment codes are always a strong warning: *"you never scan a code to receive money"*), join a Wi-Fi network, call or text a number.
 
-**4. Practice.** Ten synthetic messages, including **real ones** and ones where the right answer is **"I'd check first."** We deliberately reward checking, because that habit beats nearly every scam.
+**3. Ask someone I trust.** One tap creates a copy for a friend or family member with your **codes, card and account numbers, phone numbers, emails, names, addresses and link tracking IDs removed**. You can edit it before sending. Asking a person is one of the best defences, and this makes it safe to do.
+
+**4. "Already responded?"** Tick what happened (shared a code, sent money, gave remote access, paid with gift cards…) and get an **ordered recovery plan**: *Right now (next 15 minutes)*, *Today*, *Over the next few days*. It's deduplicated, saved only on your device, and printable. It opens with "this happens to careful, smart people" because shame stops people from acting fast.
+
+**5. Practice.** Ten synthetic messages, including **real ones** and ones where the right answer is **"I'd check first."** We deliberately reward checking, because that habit beats nearly every scam.
 
 ## How we built it
 - Plain HTML, CSS and JavaScript, with **no libraries, frameworks, fonts, trackers or build step**. It works as a static site, from a downloaded folder, or installed as an app.
-- **On-device rule engine** (`js/analyzer.js`, `js/links.js`). Scores are explainable: every warning points to exact words or a specific link finding.
+- **On-device rule engine** (`js/analyzer.js`, `js/links.js`). Scores are explainable: every warning points to exact words or a specific link finding, and the app shows the full point breakdown.
+- **QR X-ray** (`js/qr.js`) uses the browser's built-in `BarcodeDetector` on camera frames or a photo, then parses the payload (`upi://pay`, `bitcoin:`, `WIFI:`, `tel:`, `SMSTO:`, `mailto:`, vCard, URLs) into plain language. The parser is pure and unit-tested; payment codes feed a "critical" sign into the same engine.
 - **Privacy enforced by the browser, not just promised.** The page's Content Security Policy sets `connect-src 'none'` and `form-action 'none'`. Even if our code had a bug, the browser would refuse to send data anywhere. The "How it works" tab shows a live counter of network requests since the page loaded (it stays at 0).
 - **Works offline** via a service worker. Read-aloud uses **on-device voices only** (some browsers' cloud voices would send the text away, so we filter them out).
 - **Installable app with "Share to Second Look"** (Web Share Target) on Android. Shared text is served from the offline cache so it never reaches the web server, and it's wiped from the address bar immediately.
 - **Accessible:** semantic HTML, keyboard support, visible focus, screen-reader labels on every highlight, colour never used alone (shapes and words too), three text sizes, dark mode, reduced-motion support, works at phone width.
-- **10 automated tests** (`node --test`) and an evaluation script (`node eval/run.js`).
+- **16 automated tests** (`node --test`) and an evaluation script (`node eval/run.js`).
 
 ## How we measured it (evidence of a safer outcome)
 We wrote labelled synthetic test messages and evaluated in **rounds**. Each round, a *new* set was scored **once, blind**, before we looked at what it missed:
@@ -56,9 +61,10 @@ We wrote labelled synthetic test messages and evaluated in **rounds**. Each roun
 |---|---|---|
 | Round 1, first blind score | 36% | 10% |
 | Round 2, first blind score (after rebuilding around scam *structure*) | 40% | 8% |
-| **Round 3: frozen, never tuned** | **67% (10/15)** | **0% (0/12)** |
+| Round 3, first blind score | 67% (10/15) | 0% (0/12) |
+| **Round 4: frozen, never tuned** | **73% (11/15)** | **8% (1/12)** |
 
-Round 1 showed our first rules were **overfit**: they knew our own examples, not scams. So we changed the approach from matching phrases to detecting the *shape* of a scam: an **ask** (send money, move savings, share a code, change bank details) combined with a **lever** (pressure, fear, secrecy, greed) and a **redirect** (a link or phone number). Round 3 is the number we stand behind. Judges can re-run every round in the app ("How it works" → *Re-run the test on this device*).
+Round 1 showed our first rules were **overfit**: they knew our own examples, not scams. So we changed the approach from matching phrases to detecting the *shape* of a scam: an **ask** (send money, move savings, share a code, change bank details) combined with a **lever** (pressure, fear, secrecy, greed) and a **redirect** (a link or phone number). Round 4 is the number we stand behind. We wrote it *before* fixing round 3's misses (overpayment checks, survey "rewards", data-entry job offers), scored it once before the fixes (counts only, without reading the misses) and once after. The fixes caught every round-3 miss but didn't move round 4 at all, which is exactly why we only quote held-out numbers. Judges can re-run every round in the app ("How it works" → *Re-run the test on this device*).
 
 **One example of the safer outcome:** a "Hi Mum, I dropped my phone, this is my new number… can you send £480… don't tell dad" message is rated **Strong warning signs**. Second Look highlights the new-number story, the money request and the secrecy request. Its first instruction is *"Call your family member on the number you already have saved."* That one call ends this scam every time.
 
@@ -79,19 +85,19 @@ Scams are a *persuasion* problem more than a *technology* problem. The most prot
 
 ## Limitations (honest)
 - **It can't tell you a message is safe.** It reads words and link addresses only. It can't see the real sender, check numbers, or visit pages.
-- **It misses about 1 in 3 new scams** in our frozen test from the text alone, especially ones that start innocently ("Is this still Megan's number?"), overpayment stories and fake "credits". The three questions help, but don't fix this.
+- **It misses about 1 in 4 new scams** in our frozen test from the text alone, especially ones that start innocently ("Is this still Megan's number?"), and it wrongly flagged 1 of 12 ordinary messages. The three questions help, but don't fix this.
 - **English only**, with advice and reporting links written mainly for the US (7726 spam forwarding also works in the UK and Canada).
 - Rules need maintenance as scams evolve. Our test sets are small (≈150 synthetic messages) and written by us, so the numbers are indicative, not a benchmark.
-- Text only: no screenshots or voice yet.
+- Text and QR codes only: no screenshots or voice yet. QR reading needs a browser with a built-in scanner (Chrome and Edge on Android, Mac and ChromeOS); elsewhere you can type the address your camera shows.
 
 ## What's next
-On-device OCR for screenshots; Spanish and other languages; an optional small on-device language model to catch scams that don't use known phrases (keeping the no-network guarantee); a browser extension that adds "Take a second look" to the right-click menu.
+On-device OCR for screenshots (most people receive scams as screenshots forwarded by family); Spanish and other languages; an optional small on-device language model to catch scams that don't use known phrases (keeping the no-network guarantee); a browser extension that adds "Take a second look" to the right-click menu.
 
 ## Built with
-html, css, javascript, service-worker, web-share-target, content-security-policy, node.js (tests)
+html, css, javascript, barcodedetector-api, getusermedia, service-worker, web-share-target, content-security-policy, node.js (tests)
 
 ## Event work vs pre-existing work
-**Everything in this repository was created during SafeSpace Hacks (Oct 17 – Nov 22, 2026).** No pre-existing code, templates, libraries, fonts, images or datasets were used.
+**Everything in this repository was created during Next Byte Hacks V5 (first commit Oct 28, 2026; the event runs Oct 6 – Nov 8, 2026).** No pre-existing code, templates, libraries, fonts, images or datasets were used. The project hasn't been submitted to any other hackathon.
 
 ## Credits
 - No third-party libraries, assets or datasets. All example and test messages are synthetic and were written for this project; phone numbers use the fictional 555 range.

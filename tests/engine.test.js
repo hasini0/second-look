@@ -6,7 +6,7 @@ const { analyze } = require("../js/analyzer.js");
 const links = require("../js/links.js");
 const { redact } = require("../js/redact.js");
 const { buildPlan } = require("../js/recovery.js");
-const { HOLDOUT3 } = require("../js/samples.js");
+const { HOLDOUT4 } = require("../js/samples.js");
 
 test("never calls a message safe", () => {
   const r = analyze("See you at 7 for dinner!");
@@ -67,14 +67,62 @@ test("recovery plan puts the urgent steps first and has no duplicates", () => {
   assert.deepEqual(buildPlan([]), []);
 });
 
-test("frozen round-3 score stays what we publish", () => {
+test("frozen round-4 score stays what we publish", () => {
   let caught = 0, fp = 0;
-  for (const r of HOLDOUT3) {
+  for (const r of HOLDOUT4) {
     const flagged = analyze(r.text).level !== "few";
     if (r.label === "scam" && flagged) caught++;
     if (r.label === "legit" && flagged) fp++;
   }
   // If a rule change moves these, update the README and Devpost numbers too.
-  assert.equal(caught, 10);
-  assert.equal(fp, 0);
+  assert.equal(caught, 11);
+  assert.equal(fp, 1);
+});
+
+// ---------------------------------------------------------------- added for Next Byte Hacks
+
+const qr = require("../js/qr.js");
+
+test("QR payment codes are recognised as sending money", () => {
+  const upi = qr.parse("upi://pay?pa=refund.desk@okbank&pn=Refund%20Desk&am=4999&cu=INR&tn=Receive%20refund");
+  assert.equal(upi.kind, "payment");
+  assert.match(upi.summary, /INR 4999 to Refund Desk/);
+  assert.equal(qr.parse("bitcoin:bc1qxyz123456789?amount=0.05").kind, "payment");
+});
+
+test("QR codes that open links, join Wi-Fi or hold text are told apart", () => {
+  assert.equal(qr.parse("https://pay-parking.top/zone4").kind, "link");
+  const wifi = qr.parse("WIFI:T:nopass;S:Free Airport WiFi;;");
+  assert.equal(wifi.kind, "wifi");
+  assert.match(wifi.summary, /Free Airport WiFi/);
+  assert.equal(qr.parse("tel:+15550100").kind, "phone");
+  assert.equal(qr.parse("Table 12, enjoy your meal").kind, "text");
+});
+
+test("a QR code that sends money is always a strong warning, whatever its words", () => {
+  const info = qr.parse("upi://pay?pa=x@okbank&pn=Buyer&am=2000");
+  const r = analyze(info.text, { qr: info });
+  assert.equal(r.level, "strong");
+  assert.equal(r.critical, "The QR code would send money from you");
+  assert.ok(r.verify[0].text.includes("QR codes"));
+});
+
+test("a parking-meter QR link pretending to be a brand is caught", () => {
+  const info = qr.parse("https://paypal-parking.top/pay");
+  assert.equal(analyze(info.text, { qr: info }).level, "strong");
+});
+
+test("the score breakdown adds up and explains the level", () => {
+  const r = analyze("URGENT: your account will be suspended. Confirm your password at secure-login-update.top");
+  const total = r.breakdown.reduce((a, b) => a + b.points, 0);
+  assert.equal(Math.round(total * 10) / 10, r.score);
+  assert.ok(r.breakdown.some((b) => b.label === "Rushes you"));
+  assert.deepEqual(r.thresholds, { some: 2.5, strong: 6 });
+  assert.equal(analyze("See you at 7!").breakdown.length, 0);
+});
+
+test("overpayment and survey-reward scams are caught (round-3 fixes)", () => {
+  assert.notEqual(analyze("I'll mail a cashier's check for more than the price, just send the difference back to my mover.").level, "few");
+  assert.notEqual(analyze("Your loyalty reward of $100 expires today. Take a quick survey to claim it.").level, "few");
+  assert.equal(analyze("Thanks for taking our survey last week, the results are on the website.").level, "few");
 });
