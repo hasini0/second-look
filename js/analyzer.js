@@ -273,13 +273,20 @@
     return found;
   }
 
+  // Overlapping matches become one highlight that remembers every sign inside it, so tapping any
+  // sign in the list still finds its words. A link wins the highlight's look if one is involved.
   function mergeHighlights(items) {
     items.sort((a, b) => a.start - b.start || b.end - a.end);
     const out = [];
     for (const it of items) {
       const last = out[out.length - 1];
-      if (last && it.start < last.end) continue;
-      out.push(it);
+      if (last && it.start < last.end) {
+        last.end = Math.max(last.end, it.end);
+        if (!last.ids.includes(it.id)) last.ids.push(it.id);
+        if (it.kind === "link") last.kind = "link";
+        continue;
+      }
+      out.push({ start: it.start, end: it.end, kind: it.kind, ids: [it.id] });
     }
     return out;
   }
@@ -356,11 +363,13 @@
     const unexpected = context.expected === false;
     const stranger = context.knownSender === false;
     const asks = context.asks === true;
+    let raisedByAnswers = false;
     if (asks && (unexpected || stranger)) {
       const before = level;
       if (unexpected && stranger) level = "strong";
       else if (level === "few") level = "some";
-      if (level !== before) contextNotes.push("Raised because of your answers: it asks you to do something, and " + (unexpected && stranger ? "you weren't expecting it from someone you don't know." : unexpected ? "you weren't expecting it." : "you don't know the sender."));
+      raisedByAnswers = level !== before;
+      if (raisedByAnswers) contextNotes.push("Raised because of your answers: it asks you to do something, and " + (unexpected && stranger ? "you weren't expecting it from someone you don't know." : unexpected ? "you weren't expecting it." : "you don't know the sender."));
     }
     if (context.knownSender === true && level !== "few") contextNotes.push("Even if you know the sender, their account could be hacked or copied. Check with them another way, like a phone call.");
 
@@ -411,7 +420,7 @@
 
     return {
       level, score: Math.round(score * 10) / 10, summary, contextNotes,
-      breakdown, critical, thresholds: THRESHOLDS,
+      breakdown, critical, raisedByAnswers, thresholds: THRESHOLDS,
       tactics, links: foundLinks, claims, verify, next, protective, caveats,
       highlights: mergeHighlights(highlights),
     };

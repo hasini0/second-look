@@ -6,7 +6,17 @@ const { analyze } = require("../js/analyzer.js");
 const links = require("../js/links.js");
 const { redact } = require("../js/redact.js");
 const { buildPlan } = require("../js/recovery.js");
-const { HOLDOUT4 } = require("../js/samples.js");
+const S = require("../js/samples.js");
+const { HOLDOUT4 } = S;
+
+test("every warning sign can be found in the text, even when signs overlap", () => {
+  const all = [...S.EXAMPLES, ...S.PRACTICE, ...S.EVAL, ...S.HOLDOUT, ...S.HOLDOUT2, ...S.HOLDOUT3, ...S.HOLDOUT4];
+  for (const m of all) {
+    const r = analyze(m.text);
+    for (let i = 1; i < r.highlights.length; i++) assert.ok(r.highlights[i].start >= r.highlights[i - 1].end, "overlap in: " + m.text);
+    for (const t of r.tactics) assert.ok(r.highlights.some((h) => h.ids.includes(t.id)), `${t.id} not highlighted in: ${m.text}`);
+  }
+});
 
 test("never calls a message safe", () => {
   const r = analyze("See you at 7 for dinner!");

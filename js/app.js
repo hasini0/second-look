@@ -38,13 +38,32 @@
       if (a.dataset.view === name) a.setAttribute("aria-current", "page");
       else a.removeAttribute("aria-current");
     }
+    if (name !== "check") stopCamera();
     if (name === "practice" && !practice.started) renderPractice();
     if (name === "how") renderHow();
   }
   window.addEventListener("hashchange", () => {
+    // Only tab names change the page; any other #anchor is a jump within the current page.
+    if (!VIEWS.includes(location.hash.slice(1))) return;
     route();
     window.scrollTo(0, 0);
     $("#main").focus({ preventScroll: true });
+  });
+  // In-page links like "Ask someone I trust" scroll to their section without touching the address
+  // (changing it would count as leaving the page and lose your place).
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    const id = a && a.getAttribute("href").slice(1);
+    if (!id || VIEWS.includes(id)) return;
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    const heading = target.querySelector("h2");
+    if (heading) {
+      heading.setAttribute("tabindex", "-1");
+      heading.focus({ preventScroll: true });
+    }
   });
 
   /* ================= text size ================= */
@@ -122,11 +141,15 @@
     for (const h of highlights) {
       html += esc(text.slice(pos, h.start));
       const part = text.slice(h.start, h.end);
+      // One highlight can hold several overlapping signs (see mergeHighlights in analyzer.js).
+      const signs = h.ids.map((id) => TACTIC_BY_ID[id]).filter(Boolean);
+      const names = signs.map((t) => t.name).join(", ");
+      const ids = signs.map((t) => t.id).join(" ");
       if (h.kind === "link") {
-        html += `<mark class="hl t-link" data-tactic="link">${esc(part)}</mark><span class="sr-only"> (link, not opened)</span>`;
+        html += `<mark class="hl t-link" data-tactic="link ${ids}">${esc(part)}</mark><span class="sr-only"> (link, not opened${names ? "; warning sign: " + esc(names) : ""})</span>`;
       } else {
-        const t = TACTIC_BY_ID[h.id];
-        html += `<mark class="hl t-${sevOf(t.weight) === "high" ? "high" : "mid"}" data-tactic="${t.id}" title="${esc(t.name)}">${esc(part)}</mark><span class="sr-only"> (warning sign: ${esc(t.name)})</span>`;
+        const high = signs.some((t) => sevOf(t.weight) === "high");
+        html += `<mark class="hl t-${high ? "high" : "mid"}" data-tactic="${ids}" title="${esc(names)}">${esc(part)}</mark><span class="sr-only"> (warning sign: ${esc(names)})</span>`;
       }
       pos = h.end;
     }
@@ -272,14 +295,22 @@
         <ul class="plain-list small">${r.caveats.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
       </section>`);
 
+    // A re-check (e.g. after answering a question) must not move the page or close what was open.
+    const anchor = !fresh && active && document.getElementById(active);
+    const anchorTop = anchor ? anchor.getBoundingClientRect().top : 0;
+    const whyOpen = !fresh && !!$(".why[open]", results);
+
     results.innerHTML = parts.join("");
     wireResults(r);
+    if (whyOpen) $(".why", results).open = true;
     if (fresh) {
       const h = $("#verdict-h");
       h.focus({ preventScroll: true });
       h.closest(".verdict").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
-    } else if (active && document.getElementById(active)) {
-      document.getElementById(active).focus({ preventScroll: true });
+    } else if (anchor && document.getElementById(active)) {
+      const again = document.getElementById(active);
+      window.scrollBy(0, again.getBoundingClientRect().top - anchorTop);
+      again.focus({ preventScroll: true });
     }
   }
 
@@ -300,7 +331,7 @@
           <span class="${r.level === "some" ? "on" : ""}">Some signs<br>${r.thresholds.some}+</span>
           <span class="${r.level === "strong" ? "on" : ""}">Strong signs<br>${r.thresholds.strong}+</span>
         </div>
-        <p class="small muted m0">Some signs are serious enough on their own.${r.critical ? ` <strong>Here: ${esc(r.critical)}.</strong>` : ""} Your answers to the three questions can also raise the level.</p>
+        <p class="small muted m0">Some signs are serious enough on their own.${r.critical ? ` <strong>Here: ${esc(r.critical)}.</strong>` : ""} Your answers to the three questions can also raise the level.${r.raisedByAnswers ? " <strong>Here, your answers raised it.</strong>" : ""}</p>
       </details>`;
   }
 
@@ -312,7 +343,7 @@
         for (const m of $$("mark.hl", results)) m.classList.remove("focus");
         if (!on) return;
         btn.setAttribute("aria-pressed", "true");
-        const marks = $$(`mark.hl[data-tactic="${btn.dataset.tactic}"]`, results);
+        const marks = $$(`mark.hl[data-tactic~="${btn.dataset.tactic}"]`, results);
         marks.forEach((m) => m.classList.add("focus"));
         if (marks[0]) marks[0].scrollIntoView({ behavior: "smooth", block: "center" });
       });
@@ -349,7 +380,7 @@
   }
 
   /* ================= QR code X-ray (decoded on this device) ================= */
-  const qrUI = { stream: null, timer: null };
+  const qrUI = { stream: null, timer: null, session: 0, starting: false, unsupported: false };
   const qrStatus = (text, warn) => {
     $("#qr-status").textContent = text;
     $("#qr-status").classList.toggle("warn", !!warn);
@@ -361,6 +392,7 @@
     $("#qr-open").setAttribute("aria-expanded", String(!panel.hidden));
     if (panel.hidden) return stopCamera();
     if (!(await SL.qr.isSupported())) {
+      qrUI.unsupported = true;
       $("#qr-camera").disabled = true;
       $('label[for="qr-file"]').hidden = true;
       qrStatus("This browser can't read QR codes by itself (Chrome and Edge can, on Android, Mac and ChromeOS). Instead, point your phone's camera at the code, and when it shows the address, type it in the box above without opening it.", true);
@@ -390,16 +422,36 @@
   });
 
   $("#qr-camera").addEventListener("click", async () => {
+    if (qrUI.stream || qrUI.starting) return; // one camera at a time
     const video = $("#qr-video");
+    const session = ++qrUI.session; // stopCamera() bumps this, cancelling a start that's still waiting
+    qrUI.starting = true;
+    $("#qr-camera").disabled = true;
+    let stream;
     try {
-      qrUI.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
     } catch (err) {
-      return qrStatus("Camera not available. You can choose a photo of the code instead.", true);
+      qrUI.starting = false;
+      $("#qr-camera").disabled = false;
+      return qrStatus("Camera not available or not allowed. You can choose a photo of the code instead.", true);
     }
-    video.srcObject = qrUI.stream;
+    qrUI.starting = false;
+    if (session !== qrUI.session) {
+      // Closed (tab change, panel closed, app hidden) while the camera was starting.
+      stream.getTracks().forEach((t) => t.stop());
+      $("#qr-camera").disabled = qrUI.unsupported;
+      return;
+    }
+    qrUI.stream = stream;
+    video.srcObject = stream;
     video.hidden = false;
     $("#qr-stop").hidden = false;
-    await video.play();
+    try {
+      await video.play();
+    } catch (err) {
+      stopCamera();
+      return qrStatus("Couldn't start the camera preview. You can choose a photo of the code instead.", true);
+    }
     qrStatus("Point the camera at the QR code. Nothing is recorded or sent.");
     const scan = async () => {
       if (!qrUI.stream) return;
@@ -418,13 +470,19 @@
   });
 
   function stopCamera() {
+    qrUI.session++;
     clearTimeout(qrUI.timer);
     if (qrUI.stream) qrUI.stream.getTracks().forEach((t) => t.stop());
     qrUI.stream = null;
     $("#qr-video").hidden = true;
     $("#qr-video").srcObject = null;
     $("#qr-stop").hidden = true;
+    $("#qr-camera").disabled = qrUI.unsupported || qrUI.starting;
   }
+  // Never leave the camera on in the background.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopCamera();
+  });
 
   /* ================= read aloud (on-device voices only) ================= */
   const speech = {
