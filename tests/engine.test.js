@@ -197,3 +197,13 @@ test("index.html and the offline cache load every script, all at the same versio
   const cached = sw.match(/\.\.\.\[([^\]]+)\]/)[1].match(/[a-z]+/g).sort();
   assert.deepEqual(cached, onDisk, "sw.js must cache every file in js/");
 });
+
+test("what to do now never repeats itself", () => {
+  const all = [...S.EXAMPLES, ...S.PRACTICE, ...S.EVAL, ...S.HOLDOUT, ...S.HOLDOUT2, ...S.HOLDOUT3, ...S.HOLDOUT4];
+  for (const m of all) {
+    const steps = analyze(m.text).next.map((s) => s.toLowerCase());
+    const saved = steps.filter((s) => s.includes("number you already have saved"));
+    assert.ok(saved.length <= 1, "repeated 'call them' step for: " + m.text);
+    assert.equal(new Set(steps).size, steps.length, "duplicate step for: " + m.text);
+  }
+});

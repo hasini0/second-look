@@ -52,7 +52,7 @@ Everyday people who get a suspicious text, email or DM, especially those most ta
 - Plain HTML, CSS and JavaScript, with **no libraries, frameworks, fonts, trackers or build step**. It works as a static site, from a downloaded folder, or installed as an app.
 - **On-device rule engine** (`js/analyzer.js`, `js/links.js`). Scores are explainable: every warning points to exact words or a specific link finding, and the app shows the full point breakdown.
 - **QR X-ray** (`js/qr.js`) uses the browser's built-in `BarcodeDetector` on camera frames or a photo, then parses the payload (`upi://pay`, `bitcoin:`, `WIFI:`, `tel:`, `SMSTO:`, `mailto:`, vCard, URLs) into plain language. The parser is pure and unit-tested; payment codes feed a "critical" sign into the same engine.
-- **Privacy enforced by the browser, not just promised.** The page's Content Security Policy sets `connect-src 'none'` and `form-action 'none'`. Even if our code had a bug, the browser would refuse to send data anywhere. The "How it works" tab shows a live counter of network requests since the page loaded (it stays at 0).
+- **Privacy enforced by the browser, not just promised.** The page's Content Security Policy sets `connect-src 'none'` and `form-action 'none'`. Even if our code had a bug, the browser would refuse to send data anywhere. The "How it works" tab shows a live counter of requests to other websites since the page opened (it stays at 0).
 - **Works offline** via a service worker. Read-aloud uses **on-device voices only** (some browsers' cloud voices would send the text away, so we filter them out).
 - **Installable app with "Share to Second Look"** (Web Share Target) on Android. Shared text is served from the offline cache so it never reaches the web server, and it's wiped from the address bar immediately.
 - **Accessible:** semantic HTML, keyboard support, visible focus, screen-reader labels on every highlight, colour never used alone (shapes and words too), three text sizes, dark mode, reduced-motion support, works at phone width.
@@ -108,6 +108,9 @@ html, css, javascript, barcodedetector-api, getusermedia, service-worker, web-sh
 - No third-party libraries, assets or datasets. All example and test messages are synthetic and were written for this project; phone numbers use the fictional 555 range.
 - Guidance draws on public consumer advice from the US Federal Trade Commission (ReportFraud.ftc.gov, IdentityTheft.gov), the FBI's IC3, and national cyber-security agencies.
 - **AI assistance:** Claude (Anthropic) was used to help write code, test messages and copy. [Describe how your team reviewed and edited the output.]
+
+## Screenshots to upload
+Ready-made in `docs/screenshots/`: `1-check-result.png`, `2-what-we-noticed.png`, `3-ask-someone-i-trust.png`, `4-dark-mode.png`, `6-already-responded.png`, `7-how-it-works.png`. Add one of the QR card and one of the call checklist from your video if you can.
 
 ## Try it
 - **Live demo:** https://hasini0.github.io/second-look/

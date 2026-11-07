@@ -790,12 +790,12 @@
   }
 
   /* ================= privacy proof & offline ================= */
-  let afterLoad = 0;
+  // Counts requests to any other website since the page opened. The app's own files (icons, the
+  // offline cache) don't carry your data, so they aren't counted; anything else would be a leak.
   window.addEventListener("load", () => {
-    const base = performance.getEntriesByType("resource").length;
     const update = () => {
-      afterLoad = performance.getEntriesByType("resource").length - base;
-      $("#req-count").textContent = String(afterLoad);
+      const elsewhere = performance.getEntriesByType("resource").filter((e) => new URL(e.name, location.href).origin !== location.origin);
+      $("#req-count").textContent = String(elsewhere.length);
     };
     update();
     if ("PerformanceObserver" in window) {

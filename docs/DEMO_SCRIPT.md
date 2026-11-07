@@ -33,7 +33,7 @@ Examples → *"Hi Mum" on a new number* → scroll to *Ask someone I trust*: "Co
 **Already responded?** → pick **India** under *Where do you live?*, tick *I sent money*: "An ordered plan for your country. In India, calling 1930 jumps to the top, because it can freeze money that's still moving."
 
 **2:40 – How it works and trust (15s)**
-How it works tab: "Plain JavaScript, no libraries, no server. The browser itself blocks any outgoing data: network requests stay at 0. QR codes are read with Chrome's built-in scanner."
+How it works tab: "Plain JavaScript, no libraries, no server. The browser itself blocks any outgoing data: requests to other websites stay at 0. QR codes are read with Chrome's built-in scanner."
 Evaluation table: "We test on new messages we've never tuned on. Our frozen round catches about three in four scams, with one false alarm in twelve, and we show you that honestly."
 
 **2:55 – Close (5s)**

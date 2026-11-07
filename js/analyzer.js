@@ -390,7 +390,8 @@
     if (ids.has("code")) next.push("Never share a code you were sent. If you already did, change that account's password now.");
     if (ids.has("remote")) next.push("Don't install anything they suggest. If you already did, disconnect from the internet and uninstall it.");
     if (ids.has("payment")) next.push("Don't pay with gift cards, crypto or wire transfer. No real business or agency requires this.");
-    if (ids.has("family")) next.push("Call your family member on the number you already have saved.");
+    // The family verify tip already says "call them on the number you have", so don't say it twice.
+    if (ids.has("family") && verify[0].kind !== "family") next.push("Call your family member on the number you already have saved.");
     if (ids.has("qrpay")) next.push("Don't approve this payment or enter your PIN. Receiving money never needs a scan or a PIN.");
     next.push(verify[0].text);
     if (level !== "few") next.push("Once you've checked, block the sender, report it, and delete the message.");
