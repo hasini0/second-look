@@ -8,6 +8,29 @@ const { redact } = require("../js/redact.js");
 const { buildPlan } = require("../js/recovery.js");
 const S = require("../js/samples.js");
 const { HOLDOUT4 } = S;
+const call = require("../js/call.js");
+const regions = require("../js/regions.js");
+
+test("on a call: any serious sign, or two milder ones, means hang up", () => {
+  assert.equal(call.advise([]).hangUp, false);
+  assert.equal(call.advise(["urgent"]).hangUp, false);
+  assert.equal(call.advise(["code"]).hangUp, true);
+  assert.equal(call.advise(["urgent", "claims"]).hangUp, true);
+  assert.equal(call.advise(["money"]).reasons.length, 1);
+});
+
+test("country is guessed from the browser language and changes the reporting steps", () => {
+  assert.equal(regions.guess(["en-IN", "hi"]), "in");
+  assert.equal(regions.guess(["en-GB"]), "uk");
+  assert.equal(regions.guess(["fr-FR"]), "other");
+  assert.equal(regions.guess([]), "other");
+  const india = buildPlan(["paid"], regions.REGIONS.in);
+  assert.ok(india[0].steps.some((s) => s.text.includes("1930")), "India's helpline is a right-now step when money was lost");
+  const uk = buildPlan(["identity"], regions.REGIONS.uk).flatMap((g) => g.steps.map((s) => s.text)).join(" ");
+  assert.ok(uk.includes("Action Fraud") && !uk.includes("IdentityTheft.gov"));
+  for (const r of Object.values(regions.REGIONS)) assert.ok(r.name && r.spam && r.report.length && r.identity && "emergency" in r);
+  assert.equal(regions.REGIONS.in.emergency, "112");
+});
 
 test("every warning sign can be found in the text, even when signs overlap", () => {
   const all = [...S.EXAMPLES, ...S.PRACTICE, ...S.EVAL, ...S.HOLDOUT, ...S.HOLDOUT2, ...S.HOLDOUT3, ...S.HOLDOUT4];
@@ -135,4 +158,42 @@ test("overpayment and survey-reward scams are caught (round-3 fixes)", () => {
   assert.notEqual(analyze("I'll mail a cashier's check for more than the price, just send the difference back to my mover.").level, "few");
   assert.notEqual(analyze("Your loyalty reward of $100 expires today. Take a quick survey to claim it.").level, "few");
   assert.equal(analyze("Thanks for taking our survey last week, the results are on the website.").level, "few");
+});
+
+test("redaction covers UPI IDs, IBANs, ID numbers, UK addresses and self-introductions", () => {
+  const r = (s) => redact(s).text;
+  assert.equal(r("My UPI is priya.sharma@okaxis"), "My UPI is [payment ID]");
+  assert.equal(r("IBAN GB29 NWBK 6016 1331 9268 19"), "IBAN [IBAN]");
+  assert.equal(r("Aadhaar 1234 5678 9012"), "Aadhaar [ID number]");
+  assert.equal(r("Meet at 221B Baker Street, London NW1 6XE"), "Meet at [address], London [postcode]");
+  assert.equal(r("Hi Mum it's Sarah"), "Hi Mum it's [name]");
+  assert.equal(r("Your account ending 4417"), "Your account ending in [digits]");
+});
+
+test("redaction keeps who the message claims to be from", () => {
+  const r = (s) => redact(s).text;
+  assert.equal(r("This is Amazon security."), "This is Amazon security.");
+  assert.equal(r("Hi Aunty, it's Mrs. Okafor"), "Hi Aunty, it's Mrs. Okafor");
+  assert.equal(r("Price is $1,250 for 2 tickets at 7pm"), "Price is $1,250 for 2 tickets at 7pm");
+});
+
+test("raw IP links show the full address", () => {
+  assert.equal(links.inspect("http://192.168.0.1/admin").domain, "192.168.0.1");
+  assert.ok(links.inspect("http://[2001:db8::1]/login").findings.some((f) => f.id === "ip"));
+});
+
+test("index.html and the offline cache load every script, all at the same version", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const root = path.join(__dirname, "..");
+  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+  const v = sw.match(/const V = "(\d+)"/)[1];
+  const onDisk = fs.readdirSync(path.join(root, "js")).filter((f) => f.endsWith(".js")).map((f) => f.slice(0, -3)).sort();
+  const inPage = [...html.matchAll(/src="js\/([a-z]+)\.js\?v=(\d+)"/g)];
+  assert.deepEqual(inPage.map((m) => m[1]).sort(), onDisk, "index.html must load every file in js/");
+  assert.ok(inPage.every((m) => m[2] === v), "every script tag must use version " + v);
+  assert.ok(html.includes(`styles.css?v=${v}`), "stylesheet must use version " + v);
+  const cached = sw.match(/\.\.\.\[([^\]]+)\]/)[1].match(/[a-z]+/g).sort();
+  assert.deepEqual(cached, onDisk, "sw.js must cache every file in js/");
 });

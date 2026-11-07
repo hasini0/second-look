@@ -29,6 +29,22 @@
     few: '<svg class="badge" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="currentColor"/><path d="M24 14v.5M24 21v13" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/></svg>',
   };
 
+  /* ================= country (for reporting help, js/regions.js) ================= */
+  const REGIONS = SL.regions.REGIONS;
+  let regionKey = store.get("sl-region", null);
+  if (!REGIONS[regionKey]) regionKey = SL.regions.guess(navigator.languages || [navigator.language]);
+  const region = () => REGIONS[regionKey];
+  const regionOptions = () => Object.entries(REGIONS).map(([k, r]) => `<option value="${k}" ${k === regionKey ? "selected" : ""}>${esc(r.name)}</option>`).join("");
+  function setRegion(key) {
+    if (!REGIONS[key]) return;
+    regionKey = key;
+    store.set("sl-region", key);
+    $("#region-recover").innerHTML = regionOptions();
+    showEmergencyNumber();
+    renderPlan();
+    if (lastText) runCheck(false);
+  }
+
   /* ================= routing ================= */
   const VIEWS = ["check", "recover", "practice", "how"];
   function route() {
@@ -261,6 +277,17 @@
         <ul class="verify-list">${r.verify.map((v) => `<li>${esc(v.text)}</li>`).join("")}</ul>
       </section>`);
 
+    // 6b. Where to report it, for the person's country
+    const reg = region();
+    parts.push(`
+      <section class="card" aria-labelledby="report-h">
+        <h2 id="report-h">Report it</h2>
+        <p class="muted small">Reporting helps stop the same scammer reaching other people. Type these in yourself.</p>
+        <ul class="verify-list">${[reg.spam, ...reg.report].map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
+        <label class="small" for="region-results">Your country:</label>
+        <select id="region-results" class="btn ghost select region-select">${regionOptions()}</select>
+      </section>`);
+
     // 7. Ask someone I trust (redacted)
     const red = SL.redact.redact(text);
     const shareIntro = "Can you take a second look at this message before I do anything? (I've hidden my personal details.)";
@@ -336,6 +363,7 @@
   }
 
   function wireResults(r) {
+    $("#region-results").addEventListener("change", (e) => setRegion(e.target.value));
     for (const btn of $$(".tactic", results)) {
       btn.addEventListener("click", () => {
         const on = btn.getAttribute("aria-pressed") !== "true";
@@ -394,7 +422,7 @@
     if (!(await SL.qr.isSupported())) {
       qrUI.unsupported = true;
       $("#qr-camera").disabled = true;
-      $('label[for="qr-file"]').hidden = true;
+      $("#qr-photo").hidden = true;
       qrStatus("This browser can't read QR codes by itself (Chrome and Edge can, on Android, Mac and ChromeOS). Instead, point your phone's camera at the code, and when it shows the address, type it in the box above without opening it.", true);
     }
   });
@@ -408,6 +436,7 @@
     runCheck(true); // qrInfo stays until the person edits the text (see the "input" listener)
   }
 
+  $("#qr-photo").addEventListener("click", () => $("#qr-file").click());
   $("#qr-file").addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     e.target.value = "";
@@ -484,6 +513,57 @@
     if (document.hidden) stopCamera();
   });
 
+  /* ================= paste (one tap instead of press-and-hold) ================= */
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    $("#paste").hidden = false;
+    $("#paste").addEventListener("click", async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!text.trim()) return ($("#input-status").textContent = "There's nothing copied yet. Copy the message first, then tap Paste.");
+        msg.value = text;
+        qrInfo = null;
+        $("#input-status").textContent = "";
+        runCheck(true);
+      } catch (err) {
+        $("#input-status").textContent = "Your browser didn't allow pasting. Press and hold in the box above, then choose Paste.";
+        msg.focus();
+      }
+    });
+  }
+
+  /* ================= "On a call right now?" (js/call.js) ================= */
+  $("#call-signs").innerHTML = SL.call.SIGNS.map((sign) => `
+    <label class="check-item" for="call-${sign.id}"><input type="checkbox" id="call-${sign.id}" value="${sign.id}"><span>${esc(sign.label)}</span></label>`).join("");
+  function renderCallAdvice() {
+    const ticked = $$("#call-signs input:checked").map((c) => c.value);
+    const a = SL.call.advise(ticked);
+    // One line above the list (same height every time, so the boxes never move), details below.
+    const verdict = $("#call-verdict");
+    verdict.textContent = a.headline;
+    verdict.classList.toggle("hang-up", a.hangUp);
+    $("#call-advice").innerHTML = `
+      <div class="call-advice ${a.hangUp ? "hang-up" : ""}">
+        <h3>${esc(a.hangUp ? "Why" : "What you can do")}</h3>
+        ${a.reasons.length ? `<ul class="plain-list">${a.reasons.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+        <p><strong>What to say:</strong> ${esc(a.say)}</p>
+        <ol class="steps">${a.then.map((t) => `<li>${esc(t)}</li>`).join("")}</ol>
+        ${speech.available ? '<button class="btn ghost small" type="button" id="call-speak">🔊 Read aloud</button>' : ""}
+      </div>`;
+    const speakBtn = $("#call-speak");
+    if (speakBtn) speakBtn.addEventListener("click", () => speech.say([a.headline, ...a.reasons, "What to say: " + a.say].join(" ")));
+  }
+  $("#call-signs").addEventListener("change", renderCallAdvice);
+  $("#call-open").addEventListener("click", () => {
+    const panel = $("#call-panel");
+    panel.hidden = !panel.hidden;
+    $("#call-open").setAttribute("aria-expanded", String(!panel.hidden));
+    if (panel.hidden) return;
+    renderCallAdvice();
+    panel.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    $("#call-title").setAttribute("tabindex", "-1");
+    $("#call-title").focus({ preventScroll: true });
+  });
+
   /* ================= read aloud (on-device voices only) ================= */
   const speech = {
     available: false,
@@ -528,7 +608,7 @@
     }
   }
   function renderPlan() {
-    const groups = SL.recovery.buildPlan(planState.selected);
+    const groups = SL.recovery.buildPlan(planState.selected, region());
     const el = $("#plan");
     if (!groups.length) {
       el.innerHTML = "";
@@ -579,6 +659,13 @@
       renderPlan();
     });
   }
+  function showEmergencyNumber() {
+    const n = region().emergency;
+    $("#emergency-number").textContent = n ? `${n} (or your local emergency number)` : "your local emergency number";
+  }
+  $("#region-recover").innerHTML = regionOptions();
+  $("#region-recover").addEventListener("change", (e) => setRegion(e.target.value));
+  showEmergencyNumber();
   renderSituations();
   renderPlan();
 

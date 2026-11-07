@@ -40,9 +40,13 @@ Everyday people who get a suspicious text, email or DM, especially those most ta
 
 **3. Ask someone I trust.** One tap creates a copy for a friend or family member with your **codes, card and account numbers, phone numbers, emails, names, addresses and link tracking IDs removed**. You can edit it before sending. Asking a person is one of the best defences, and this makes it safe to do.
 
-**4. "Already responded?"** Tick what happened (shared a code, sent money, gave remote access, paid with gift cards…) and get an **ordered recovery plan**: *Right now (next 15 minutes)*, *Today*, *Over the next few days*. It's deduplicated, saved only on your device, and printable. It opens with "this happens to careful, smart people" because shame stops people from acting fast.
+**4. On a call right now?** Phone scams take the most money from older adults, and there's no message to paste. One big button opens a checklist to tick *while the caller talks* ("they want a code", "they say don't hang up", "they say a family member is in trouble"…). A sticky banner answers instantly: **"Hang up now. It's OK to hang up."**, followed by exactly what to say and how to call back on a number you find yourself.
 
-**5. Practice.** Ten synthetic messages, including **real ones** and ones where the right answer is **"I'd check first."** We deliberately reward checking, because that habit beats nearly every scam.
+**5. "Already responded?"** Tick what happened (shared a code, sent money, gave remote access, paid with gift cards…) and get an **ordered recovery plan**: *Right now (next 15 minutes)*, *Today*, *Over the next few days*. It's deduplicated, saved only on your device, and printable. It opens with "this happens to careful, smart people" because shame stops people from acting fast.
+
+**6. Report it, for your country.** Reporting help, the emergency number and the recovery steps follow the country you pick (guessed from your browser): the US, UK, India, Canada and Australia, with general advice elsewhere. In India, for example, calling the 1930 cyber-crime helpline moves to *Right now* when money was lost, because it can freeze money still moving between accounts.
+
+**7. Practice.** Ten synthetic messages, including **real ones** and ones where the right answer is **"I'd check first."** We deliberately reward checking, because that habit beats nearly every scam.
 
 ## How we built it
 - Plain HTML, CSS and JavaScript, with **no libraries, frameworks, fonts, trackers or build step**. It works as a static site, from a downloaded folder, or installed as an app.
@@ -52,7 +56,8 @@ Everyday people who get a suspicious text, email or DM, especially those most ta
 - **Works offline** via a service worker. Read-aloud uses **on-device voices only** (some browsers' cloud voices would send the text away, so we filter them out).
 - **Installable app with "Share to Second Look"** (Web Share Target) on Android. Shared text is served from the offline cache so it never reaches the web server, and it's wiped from the address bar immediately.
 - **Accessible:** semantic HTML, keyboard support, visible focus, screen-reader labels on every highlight, colour never used alone (shapes and words too), three text sizes, dark mode, reduced-motion support, works at phone width.
-- **16 automated tests** (`node --test`) and an evaluation script (`node eval/run.js`).
+- **Separated, data-driven modules** (`js/call.js`, `js/regions.js`, `js/qr.js` …): adding a warning sign, brand, country or QR type is one entry in a list. See `docs/EXTENDING.md`.
+- **23 automated tests** (`node --test`), including one that fails if the page and the offline cache ever load different versions of a file, and an evaluation script (`node eval/run.js`).
 
 ## How we measured it (evidence of a safer outcome)
 We wrote labelled synthetic test messages and evaluated in **rounds**. Each round, a *new* set was scored **once, blind**, before we looked at what it missed:
@@ -86,12 +91,12 @@ Scams are a *persuasion* problem more than a *technology* problem. The most prot
 ## Limitations (honest)
 - **It can't tell you a message is safe.** It reads words and link addresses only. It can't see the real sender, check numbers, or visit pages.
 - **It misses about 1 in 4 new scams** in our frozen test from the text alone, especially ones that start innocently ("Is this still Megan's number?"), and it wrongly flagged 1 of 12 ordinary messages. The three questions help, but don't fix this.
-- **English only**, with advice and reporting links written mainly for the US (7726 spam forwarding also works in the UK and Canada).
+- **English only.** Reporting help covers the US, UK, India, Canada and Australia; elsewhere it gives general advice.
 - Rules need maintenance as scams evolve. Our test sets are small (≈150 synthetic messages) and written by us, so the numbers are indicative, not a benchmark.
 - Text and QR codes only: no screenshots or voice yet. QR reading needs a browser with a built-in scanner (Chrome and Edge on Android, Mac and ChromeOS); elsewhere you can type the address your camera shows.
 
 ## What's next
-On-device OCR for screenshots (most people receive scams as screenshots forwarded by family); Spanish and other languages; an optional small on-device language model to catch scams that don't use known phrases (keeping the no-network guarantee); a browser extension that adds "Take a second look" to the right-click menu.
+Hindi and Spanish; more countries in `js/regions.js`; on-device OCR for screenshots (most people receive scams as screenshots forwarded by family); Spanish and other languages; an optional small on-device language model to catch scams that don't use known phrases (keeping the no-network guarantee); a browser extension that adds "Take a second look" to the right-click menu.
 
 ## Built with
 html, css, javascript, barcodedetector-api, getusermedia, service-worker, web-share-target, content-security-policy, node.js (tests)

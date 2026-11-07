@@ -37,7 +37,9 @@
     return out;
   }
 
-  const money = (amount, currency) => (amount ? `${currency ? currency + " " : ""}${amount}` : "an amount you choose");
+  // A missing or garbled amount means the payer types it in, which is just as dangerous.
+  const money = (amount, currency) =>
+    amount && /^\d+(?:\.\d+)?$/.test(amount) ? `${currency ? currency + " " : ""}${amount}` : "an amount you type in";
 
   /**
    * Explain what a QR code's contents would do.
@@ -94,8 +96,8 @@
     }
 
     if (lower.startsWith("mailto:")) {
-      const addr = value.slice(7).split("?")[0];
-      return { kind: "email", summary: `Emails ${addr}`, details: [["To", addr]], text: value.slice(7) };
+      const addr = value.slice(7).split("?")[0] || "(no address)";
+      return { kind: "email", summary: `Starts an email to ${addr}`, details: [["To", addr]], text: value.slice(7) };
     }
 
     if (lower.startsWith("begin:vcard") || lower.startsWith("mecard:")) {

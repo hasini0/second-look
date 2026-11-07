@@ -11,17 +11,31 @@
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
 
+  // Capitalised words after a greeting or "it's" that are not personal names.
+  const FAMILY_WORDS = "mum|mom|dad|mama|papa|grandma|grandpa|gran|nana|aunty|auntie|aunt|uncle|son|daughter|darling|dear|love|honey";
+  const TITLES = "mr|mrs|ms|miss|dr|prof|coach|officer|sergeant|captain|agent|detective|nurse|doctor|pastor|father|sister";
+  const ORGANISATIONS = "amazon|apple|microsoft|google|paypal|netflix|chase|citi|coinbase|venmo|zelle|facebook|meta|instagram|whatsapp|usps|fedex|ups|dhl|irs|hmrc|medicare|visa|mastercard|norton|mcafee|bank|support|security|customer|tech";
+  const NOT_NAMES = "monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|march|april|may|june|july|august|september|october|november|december|me|not|just|so|very|really|fine|okay|here|home|back|sorry|urgent|important|your|the|a|an|in|on|at|from|with|still|also|now|time";
+
+  // Order matters: specific formats (IBAN, ID numbers) run before the general number rules.
   const RULES = [
+    { label: "bank account (IBAN)", tag: "[IBAN]", re: /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){2,7}(?:\s?[A-Z0-9]{1,3})?\b/g },
+    { label: "ID number", tag: "[ID number]", re: /\b\d{4}\s\d{4}\s\d{4}\b/g }, // e.g. Aadhaar
     { label: "card or account number", tag: "[card/account number]", re: /\b(?:\d[ -]?){12,18}\d\b/g },
     { label: "phone number", tag: "[phone number]", re: /(?<![\w$£€.,])\+?\(?\d[\d\s().-]{7,}\d\b/g },
-    { label: "last digits", tag: "ending in [digits]", re: /\b(?:ending|ends) (?:in|with) \d{2,6}\b/gi },
+    { label: "last digits", tag: "ending in [digits]", re: /\b(?:ending|ends)(?: in| with)? \d{2,6}\b/gi },
     { label: "code", tag: "[code]", re: /(?<=\b(?:code|otp|pin|passcode)\b[^.\n]{0,20}?)\b\d{4,8}\b|\b\d{4,8}\b(?=[^.\n]{0,20}\b(?:is your|code|otp|pin)\b)/gi },
     { label: "number", tag: "[number]", re: /(?<![\w$£€.,])\d{5,}(?![\w,]|\.\d)/g },
     { label: "reference", tag: "[reference]", re: /\b(?=[A-Z0-9-]*\d{3})(?=[A-Z0-9-]*[A-Z])[A-Z0-9][A-Z0-9-]{5,}\b/g },
-    { label: "street address", tag: "[address]", re: /\b\d{1,5}\s+(?:[A-Z][a-z]+\s){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Boulevard|Blvd|Drive|Dr|Court|Ct|Way|Place|Pl)\b/g },
+    { label: "street address", tag: "[address]", re: /\b\d{1,5}[A-Z]?\s+(?:[A-Z][a-z]+\s){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Boulevard|Blvd|Drive|Dr|Court|Ct|Way|Place|Pl|Close|Crescent|Gardens|Terrace|Nagar|Marg)\b/g },
+    { label: "postcode", tag: "[postcode]", re: /\b[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}\b/g }, // UK style, e.g. NW1 6XE
     { label: "name", tag: "$1[name]", re: /\b((?:Hi|Hello|Hey|Dear|Attn:?)\s+)([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/g, group: true,
       // Greetings like "Dear Customer" or "Hi Mum" aren't names.
-      keep: /^(?:customer|user|client|member|sir|madam|mum|mom|dad|there|all|friend|valued|account|team|everyone|folks)\b/i },
+      keep: new RegExp(`^(?:customer|user|client|member|sir|madam|there|all|friend|valued|account|team|everyone|folks|${FAMILY_WORDS})\\b`, "i") },
+    // Self-introductions: "it's Sarah", "this is Priya", "my name is Dev". Companies ("this is Amazon
+    // security") and titles ("it's Mrs. Okafor") stay: a helper needs to know who it claims to be.
+    { label: "name", tag: "$1[name]", re: /\b((?:[Ii]t'?s|[Tt]his is|I'?m|I am|[Mm]y name is)\s+)([A-Z][a-z]+)\b/g, group: true,
+      keep: new RegExp(`^(?:${NOT_NAMES}|${TITLES}|${ORGANISATIONS}|${FAMILY_WORDS})$`, "i") },
   ];
 
   /**
@@ -36,6 +50,8 @@
     const bump = (label) => (counts[label] = (counts[label] || 0) + 1);
 
     text = text.replace(/\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g, () => (bump("email address"), "[email]"));
+    // UPI and similar payment IDs look like emails without a dot: name@okaxis, 98xxxxxx@ybl.
+    text = text.replace(/\b[\w.-]{2,}@[a-z][a-z0-9]{1,15}\b/gi, () => (bump("payment ID"), "[payment ID]"));
 
     // Protect links next so their digits aren't mistaken for phone numbers.
     text = text.replace(/\b(?:https?:\/\/|hxxps?:\/\/|www\.)[^\s<>"']+|\b(?:[a-z0-9-]+\.)+(?:com|net|org|info|top|xyz|icu|click|live|shop|online|site|support|co|io|ly|me|us|uk|vip)(?:\/[^\s<>"']*)?/gi, (m) => {

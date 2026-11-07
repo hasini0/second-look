@@ -11,7 +11,10 @@ Built for **Next Byte Hacks V5**. Everything here was created during the event (
 - **"Why this level?"** (new): an open score breakdown. Every point each warning sign added, the thresholds, and the one serious sign that decided it, if there was one.
 - **Link X-ray**: shows where a link really goes and catches lookalike domains, foreign look-alike letters, brand-in-subdomain tricks, `@` tricks, IPs and shorteners. It never opens the link.
 - **Three questions only you can answer**: your context can raise the warning level, never lower it.
-- **Ask someone I trust**: a copy with codes, numbers, contacts, names and link tracking IDs removed, editable before sharing.
+- **On a call right now?** (new): phone scams take the most money and happen live. Tick what the caller is saying and get an instant answer ("Hang up now. It's OK to hang up."), what to say, and how to call back safely.
+- **Report it, for your country** (new): reporting help, emergency number and recovery steps for the US, UK, India, Canada and Australia (e.g. India's 1930 helpline becomes a "right now" step when money was lost), with general advice elsewhere.
+- **One-tap Paste** (new): no fiddly press-and-hold.
+- **Ask someone I trust**: a copy with codes, card and bank numbers (including IBANs), UPI and payment IDs, ID numbers, phone numbers, emails, addresses, names and link tracking IDs removed, editable before sharing. It keeps who the message claims to be from ("Amazon", "Mrs. Okafor") so the helper can judge it.
 - **Already responded?**: an ordered recovery plan (next 15 minutes / today / this week), saved only on your device, printable.
 - **Practice**: 10 synthetic messages, including real ones and "check first" ones.
 - **Private by construction**: no server, no AI service, no trackers, no libraries. The CSP sets `connect-src 'none'`. Works offline and installs as an app (with Android "Share to Second Look").
@@ -47,7 +50,7 @@ node eval/run.js
 Each round's new set was scored once before we looked at the misses, then used to fix gaps. Round 4 was written before the round-3 fixes and scored before them (11/15, 1/12, counts only) and once after: the fixes didn't change it. Round 4 is the honest number. It was written by the same team that wrote the rules, so treat it as indicative, not a benchmark. See [docs/DEVPOST.md](docs/DEVPOST.md) for the full story.
 
 ## Limitations
-It reads words, link addresses and QR codes only, so it can't confirm a sender or say a message is safe. It misses about 1 in 4 new scams in our frozen test and wrongly flagged 1 of 12 ordinary messages, it's English-only, and its advice is US-focused. Test sets are small and synthetic. QR reading needs a browser with a built-in scanner (Chrome and Edge on Android, Mac and ChromeOS); elsewhere you can type the address your camera shows.
+It reads words, link addresses and QR codes only, so it can't confirm a sender or say a message is safe. It misses about 1 in 4 new scams in our frozen test and wrongly flagged 1 of 12 ordinary messages, and it's English-only. Reporting help covers five countries, with general advice elsewhere. Test sets are small and synthetic. QR reading needs a browser with a built-in scanner (Chrome and Edge on Android, Mac and ChromeOS); elsewhere you can type the address your camera shows.
 
 ## Project layout
 ```
@@ -56,12 +59,15 @@ styles.css            design (light/dark, text sizes, print)
 js/links.js           link X-ray (no network)
 js/analyzer.js        tactic detection, levels, advice
 js/qr.js              QR code reading (built-in BarcodeDetector) and explaining what a code would do
+js/call.js            "On a call right now?" warning signs and advice
+js/regions.js         reporting help, emergency numbers and identity steps by country
 js/redact.js          redaction for "Ask someone I trust"
 js/recovery.js        recovery plan builder
 js/samples.js         synthetic examples, practice and test sets
 js/app.js             interface
 sw.js                 offline cache
-tests/                node --test
+tests/                node --test (23 tests)
+docs/EXTENDING.md     how to add warning signs, brands, countries, QR types, recovery steps
 eval/run.js           evaluation report
 docs/demo-qr/         sample QR codes for trying the scanner (fake UPI refund, fake parking meter, real site, Wi-Fi)
 ```

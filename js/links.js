@@ -92,7 +92,11 @@
     return prev[n];
   }
 
+  const isIPv4 = (host) => /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+  const isIPv6 = (host) => /^\[[0-9a-f:.]+\]$/i.test(host);
+
   function registrableDomain(host) {
+    if (isIPv4(host) || isIPv6(host)) return host; // a raw address has no "website name" to shorten to
     const labels = host.split(".");
     if (labels.length <= 2) return host;
     const lastTwo = labels.slice(-2).join(".");
@@ -146,7 +150,7 @@
       });
     }
 
-    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) {
+    if (isIPv4(host) || isIPv6(host)) {
       findings.push({ id: "ip", severity: "high", title: "No company name at all", detail: "The link goes to a raw number address (an IP address). Real companies almost always use their name." });
     }
 

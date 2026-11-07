@@ -1,8 +1,10 @@
 /* Second Look — offline support. Caches the app's own files; never touches anything else. */
-const VERSION = "second-look-v2";
+// Bump V (and the ?v= in index.html) on every release. A test checks the two agree.
+const V = "5";
+const VERSION = "second-look-v" + V;
 const FILES = [
-  "./", "./index.html", "./styles.css", "./manifest.webmanifest",
-  "./js/links.js", "./js/analyzer.js", "./js/redact.js", "./js/recovery.js", "./js/samples.js", "./js/qr.js", "./js/app.js",
+  "./", "./index.html", "./styles.css?v=" + V, "./manifest.webmanifest",
+  ...["links", "analyzer", "redact", "recovery", "samples", "qr", "call", "regions", "app"].map((f) => `./js/${f}.js?v=${V}`),
   "./icons/icon.svg", "./icons/icon-192.png", "./icons/icon-512.png",
 ];
 

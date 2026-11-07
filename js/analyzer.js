@@ -393,7 +393,7 @@
     if (ids.has("family")) next.push("Call your family member on the number you already have saved.");
     if (ids.has("qrpay")) next.push("Don't approve this payment or enter your PIN. Receiving money never needs a scan or a PIN.");
     next.push(verify[0].text);
-    if (level !== "few") next.push("Once you've checked, block the sender and delete the message. You can also forward scam texts to 7726 (SPAM) in the US, UK and Canada.");
+    if (level !== "few") next.push("Once you've checked, block the sender, report it, and delete the message.");
 
     const names = tactics.slice(0, 3).map((t) => SAYS[t.id]);
     const riskyLinks = foundLinks.filter((l) => l.findings.some((f) => f.severity === "high"));

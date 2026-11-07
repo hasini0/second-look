@@ -332,7 +332,7 @@ fieldset.card > legend { float: left; width: 100%; padding: 0; }
 fieldset.card > legend + * { clear: both; }
 .tabs .short { display: none; }
 @media (max-width: 480px) {
-  .tabs { gap: 0; justify-content: space-between; }
+  .tabs { gap: 0; justify-content: space-between; flex-wrap: wrap; }
   .tabs a { padding-left: 8px; padding-right: 8px; font-size: .88rem; }
   .tabs .long { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .tabs .short { display: inline; }
@@ -356,7 +356,6 @@ fieldset.card > legend + * { clear: both; }
 
 /* QR code X-ray */
 .qr-panel .row { margin-bottom: 4px; }
-.qr-panel label.btn { cursor: pointer; }
 .qr-video { display: block; width: 100%; max-width: 420px; aspect-ratio: 1; object-fit: cover; border-radius: 12px; margin: 12px 0 4px; background: #000; }
 .qr-video[hidden] { display: none; }
 .qr-panel .status.warn { color: var(--some); }
@@ -368,3 +367,24 @@ fieldset.card > legend + * { clear: both; }
 
 /* Keep sections clear of the sticky header when the app scrolls to them */
 .card { scroll-margin-top: 130px; }
+
+/* "On a call right now?" */
+.call-banner { display: flex; gap: 14px; align-items: center; width: 100%; text-align: left; margin: 0 0 16px; padding: 14px 16px;
+  border: 2px solid color-mix(in srgb, var(--strong) 40%, transparent); border-radius: var(--radius); background: var(--strong-bg);
+  color: var(--ink); font: inherit; cursor: pointer; }
+.call-banner:hover { border-color: var(--strong); }
+.call-banner strong { display: block; color: var(--strong); font-size: 1.05rem; }
+.call-banner .small { display: block; color: var(--ink-2); }
+.call-icon { font-size: 1.8rem; line-height: 1; }
+.call-signs { display: grid; gap: 4px; margin-bottom: 12px; }
+.call-verdict { position: sticky; top: 96px; z-index: 2; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; font-weight: 700;
+  font-size: 1.1rem; background: var(--surface-2); color: var(--ink); min-height: 3.2em; display: flex; align-items: center; }
+.call-verdict.hang-up { background: var(--strong); color: var(--strong-bg); } /* strong-bg is the readable opposite in both themes */
+.call-advice { border-radius: 12px; padding: 14px; background: var(--surface-2); }
+.call-advice h3 { margin: 0 0 8px; font-size: 1.25rem; }
+.call-advice.hang-up { background: var(--strong-bg); border: 2px solid var(--strong); }
+.call-advice.hang-up h3 { color: var(--strong); font-size: 1.45rem; }
+
+/* Country picker */
+.region-select { margin-top: 8px; max-width: 100%; }
+#input-status:empty { display: none; }

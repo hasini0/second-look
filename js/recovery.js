@@ -1,7 +1,7 @@
 /*
  * Second Look — "I think I already fell for it" recovery plan.
  * Turns what happened into an ordered checklist: the steps that limit damage fastest come first.
- * General guidance only; US reporting links, with a note for other countries.
+ * General guidance only. Pass a region from js/regions.js to get that country's reporting steps.
  */
 (function (root, factory) {
   const mod = factory();
@@ -75,8 +75,12 @@
 
   const WHEN_LABELS = { now: "Right now (next 15 minutes)", today: "Today", week: "Over the next few days" };
 
-  /** Build an ordered plan for the selected situation ids. */
-  function buildPlan(selected) {
+  /**
+   * Build an ordered plan for the selected situation ids.
+   * `region` (optional, an entry from js/regions.js) swaps the US-flavoured reporting and identity
+   * steps for that country's services.
+   */
+  function buildPlan(selected, region) {
     const order = ["remote", "code", "password", "card", "paid", "giftcard", "identity", "clicked", "replied"];
     const picked = order.filter((id) => selected.includes(id));
     const seen = new Set();
@@ -86,8 +90,19 @@
       seen.add(step.text);
       groups[step.when].push({ id: source + ":" + groups[step.when].length, text: step.text, source });
     };
-    for (const id of picked) for (const step of STEPS[id]) add(step, id);
-    if (picked.length) for (const step of ALWAYS) add(step, "always");
+    const local = (step) => {
+      if (!region) return step;
+      if (step === ALWAYS[0]) {
+        // Some helplines can freeze stolen money if called within the first hours (urgentReport).
+        const lostMoney = picked.some((id) => id === "paid" || id === "card" || id === "giftcard");
+        return { when: region.urgentReport && lostMoney ? "now" : "today", text: "Report it. " + region.report.join(" ") + " Reports help stop the same scammer reaching others." };
+      }
+      if (step === STEPS.identity[1]) return { when: "today", text: region.identity };
+      if (step === STEPS.identity[0]) return null; // the country's identity step covers this (credit freezes are US-specific)
+      return step;
+    };
+    for (const id of picked) for (const step of STEPS[id]) { const s = local(step); if (s) add(s, id); }
+    if (picked.length) for (const step of ALWAYS) add(local(step), "always");
     return ["now", "today", "week"].filter((w) => groups[w].length).map((w) => ({ when: w, label: WHEN_LABELS[w], steps: groups[w] }));
   }
 
