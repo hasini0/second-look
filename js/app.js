@@ -114,7 +114,7 @@
     qrInfo = null;
     runCheck(true);
   });
-  $("#check").addEventListener("click", () => runCheck(true));
+  $("#check-btn").addEventListener("click", () => runCheck(true));
   $("#clear").addEventListener("click", () => {
     msg.value = "";
     results.innerHTML = "";
@@ -675,7 +675,7 @@
 
   function renderPractice() {
     practice.started = true;
-    const el = $("#practice");
+    const el = $("#practice-area");
     const items = SL.samples.PRACTICE;
     const dots = `<div class="dots" aria-hidden="true">${items.map((_, i) => `<span class="${practice.results[i] === true ? "right" : practice.results[i] === false ? "wrong" : ""} ${i === practice.i ? "current" : ""}"></span>`).join("")}</div>`;
 

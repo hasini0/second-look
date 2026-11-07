@@ -13,7 +13,7 @@
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <!-- ?v= on every file: bump it (here and in sw.js) on each release so browsers never mix old and new files -->
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -46,7 +46,7 @@
     <section id="view-check" class="view" aria-labelledby="check-title">
       <div class="hero">
         <p class="eyebrow">Free · private · works offline</p>
-        <h1 id="check-title">Not sure about a message?</h1>
+        <h1 id="check-title">Not sure about a <span class="marker">message?</span></h1>
         <p class="lede">Paste it below for a calm second opinion. Second Look explains the tricks scams use in plain words and tells you what to do next. It never opens links, and nothing leaves your device.</p>
       </div>
 
@@ -66,7 +66,7 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Clear
             </button>
           </div>
-          <button id="check" class="btn primary big" type="button">Take a second look</button>
+          <button id="check-btn" class="btn primary big" type="button">Take a second look</button>
         </div>
         <p id="input-status" class="status" role="status"></p>
       </div>
@@ -135,7 +135,7 @@
         <h1 id="practice-title">Practice spotting scams</h1>
         <p class="lede">Ten made-up messages. Some are scams, some are real, and some you can't judge from the message alone. Learning to say "I'd check first" is the most useful habit of all.</p>
       </div>
-      <div id="practice"></div>
+      <div id="practice-area"></div>
     </section>
 
     <!-- ============ HOW ============ -->
@@ -184,7 +184,7 @@
 
       <div class="card">
         <h2>Credits</h2>
-        <p class="small">Built for Next Byte Hacks V5. No third-party libraries, fonts, trackers or datasets: every example message is synthetic and was written for this project. Advice is based on public consumer guidance from the US Federal Trade Commission and national cyber-security agencies. AI assistance (Claude) was used while writing code and copy, and every rule and message was reviewed by the team.</p>
+        <p class="small">Built for Next Byte Hacks V5. No third-party libraries, trackers or datasets, and the two fonts (Atkinson Hyperlegible Next and Bricolage Grotesque, SIL Open Font License) are bundled with the app: every example message is synthetic and was written for this project. Advice is based on public consumer guidance from the US Federal Trade Commission and national cyber-security agencies. AI assistance (Claude) was used while writing code and copy, and every rule and message was reviewed by the team.</p>
       </div>
     </section>
   </main>
@@ -193,14 +193,14 @@
     <p>Second Look is a prototype that offers guidance, not guarantees. When in doubt, contact the organization yourself using details you already trust.</p>
   </footer>
 
-  <script src="js/links.js?v=8"></script>
-  <script src="js/analyzer.js?v=8"></script>
-  <script src="js/redact.js?v=8"></script>
-  <script src="js/recovery.js?v=8"></script>
-  <script src="js/samples.js?v=8"></script>
-  <script src="js/qr.js?v=8"></script>
-  <script src="js/call.js?v=8"></script>
-  <script src="js/regions.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/links.js?v=10"></script>
+  <script src="js/analyzer.js?v=10"></script>
+  <script src="js/redact.js?v=10"></script>
+  <script src="js/recovery.js?v=10"></script>
+  <script src="js/samples.js?v=10"></script>
+  <script src="js/qr.js?v=10"></script>
+  <script src="js/call.js?v=10"></script>
+  <script src="js/regions.js?v=10"></script>
+  <script src="js/app.js?v=10"></script>
 </body>
 </html>

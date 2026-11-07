@@ -49,7 +49,7 @@ Everyday people who get a suspicious text, email or DM, especially those most ta
 **7. Practice.** Ten synthetic messages, including **real ones** and ones where the right answer is **"I'd check first."** We deliberately reward checking, because that habit beats nearly every scam.
 
 ## How we built it
-- Plain HTML, CSS and JavaScript, with **no libraries, frameworks, fonts, trackers or build step**. It works as a static site, from a downloaded folder, or installed as an app.
+- Plain HTML, CSS and JavaScript, with **no libraries, frameworks, trackers or build step**. The two fonts (Atkinson Hyperlegible Next, made by the Braille Institute for low-vision readers, and Bricolage Grotesque, both SIL Open Font License) are bundled in the app, so nothing is fetched from other websites. It works as a static site, from a downloaded folder, or installed as an app.
 - **On-device rule engine** (`js/analyzer.js`, `js/links.js`). Scores are explainable: every warning points to exact words or a specific link finding, and the app shows the full point breakdown.
 - **QR X-ray** (`js/qr.js`) uses the browser's built-in `BarcodeDetector` on camera frames or a photo, then parses the payload (`upi://pay`, `bitcoin:`, `WIFI:`, `tel:`, `SMSTO:`, `mailto:`, vCard, URLs) into plain language. The parser is pure and unit-tested; payment codes feed a "critical" sign into the same engine.
 - **Privacy enforced by the browser, not just promised.** The page's Content Security Policy sets `connect-src 'none'` and `form-action 'none'`. Even if our code had a bug, the browser would refuse to send data anywhere. The "How it works" tab shows a live counter of requests to other websites since the page opened (it stays at 0).
@@ -102,7 +102,7 @@ Hindi and Spanish; more countries in `js/regions.js`; on-device OCR for screensh
 html, css, javascript, barcodedetector-api, getusermedia, service-worker, web-share-target, content-security-policy, node.js (tests)
 
 ## Event work vs pre-existing work
-**Everything in this repository was created during Next Byte Hacks V5 (first commit Oct 28, 2026; the event runs Oct 6 – Nov 8, 2026).** No pre-existing code, templates, libraries, fonts, images or datasets were used. The project hasn't been submitted to any other hackathon.
+**Everything in this repository was created during Next Byte Hacks V5 (first commit Oct 28, 2026; the event runs Oct 6 – Nov 8, 2026).** No pre-existing code, templates, libraries, images or datasets were used. The only third-party files are the two open-licence fonts in `fonts/`, with their licences alongside. The project hasn't been submitted to any other hackathon.
 
 ## Credits
 - No third-party libraries, assets or datasets. All example and test messages are synthetic and were written for this project; phone numbers use the fictional 555 range.
