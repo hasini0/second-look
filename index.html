@@ -13,7 +13,7 @@
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <!-- ?v= on every file: bump it (here and in sw.js) on each release so browsers never mix old and new files -->
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -44,15 +44,47 @@
 
     <!-- ============ CHECK ============ -->
     <section id="view-check" class="view" aria-labelledby="check-title">
-      <div class="intro">
+      <div class="hero">
+        <p class="eyebrow">Free · private · works offline</p>
         <h1 id="check-title">Not sure about a message?</h1>
-        <p class="lede">Paste it here for a calm second opinion. Second Look points out the pressure tricks scams use, explains them in plain words, and tells you a safe next step. It never opens links, and your message never leaves this device.</p>
+        <p class="lede">Paste it below for a calm second opinion. Second Look explains the tricks scams use in plain words and tells you what to do next. It never opens links, and nothing leaves your device.</p>
       </div>
 
-      <button id="call-open" class="call-banner" type="button" aria-expanded="false" aria-controls="call-panel">
-        <span class="call-icon" aria-hidden="true">📞</span>
-        <span><strong>Someone's on the phone with me right now</strong><span class="small">Tick what they're saying and find out if you should hang up.</span></span>
-      </button>
+      <div class="card input-card">
+        <label for="msg" class="field-label">Paste or type the message</label>
+        <textarea id="msg" rows="7" spellcheck="false" autocomplete="off" placeholder="A text, email or DM you're unsure about. You can also type what a caller said."></textarea>
+        <div class="input-actions">
+          <div class="tools">
+            <button id="paste" class="btn tool" type="button" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4.5h6v2.5H9z" fill="currentColor"/></svg>Paste
+            </button>
+            <label class="visually-hidden" for="examples">Try an example message</label>
+            <select id="examples" class="btn tool select">
+              <option value="">Try an example</option>
+            </select>
+            <button id="clear" class="btn tool" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Clear
+            </button>
+          </div>
+          <button id="check" class="btn primary big" type="button">Take a second look</button>
+        </div>
+        <p id="input-status" class="status" role="status"></p>
+      </div>
+
+      <div id="results" class="results" aria-live="polite"></div>
+
+      <h2 class="section-label">Something else to check?</h2>
+      <div class="tile-row">
+        <button id="call-open" class="tile" type="button" aria-expanded="false" aria-controls="call-panel">
+          <span class="tile-icon call" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 3.5h3l1.6 4.2-2 1.4a12 12 0 0 0 5.7 5.7l1.4-2 4.2 1.6v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z" fill="currentColor"/></svg></span>
+          <span class="tile-text"><strong>I'm on a phone call right now</strong><span>Tick what they're saying and find out if you should hang up.</span></span>
+        </button>
+        <button id="qr-open" class="tile" type="button" aria-expanded="false" aria-controls="qr-panel">
+          <span class="tile-icon qr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 18h2v2h-2zM18 14h2v2h-2z" fill="currentColor"/></svg></span>
+          <span class="tile-text"><strong>I have a QR code</strong><span>See what it would do before you scan it with your camera app.</span></span>
+        </button>
+      </div>
+
       <section id="call-panel" class="card call-panel" hidden aria-labelledby="call-title">
         <h2 id="call-title">What is the caller saying?</h2>
         <p class="muted small">Tick anything that's happening. You can do this while they talk.</p>
@@ -60,22 +92,6 @@
         <div id="call-signs" class="call-signs"></div>
         <div id="call-advice"></div>
       </section>
-
-      <div class="card input-card">
-        <label for="msg" class="field-label">The message</label>
-        <textarea id="msg" rows="7" spellcheck="false" autocomplete="off" placeholder="Paste a text, email or DM here. You can also type what a caller said."></textarea>
-        <div class="input-actions">
-          <button id="check" class="btn primary" type="button">Take a second look</button>
-          <label class="visually-hidden" for="examples">Try an example message</label>
-          <select id="examples" class="btn ghost select">
-            <option value="">Examples…</option>
-          </select>
-          <button id="paste" class="btn ghost" type="button" hidden>Paste</button>
-          <button id="clear" class="btn ghost" type="button">Clear</button>
-          <button id="qr-open" class="btn ghost" type="button" aria-expanded="false" aria-controls="qr-panel">Scan a QR code</button>
-        </div>
-        <p id="input-status" class="status" role="status"></p>
-      </div>
 
       <div id="qr-panel" class="card qr-panel" hidden>
         <h2>Check a QR code before you scan it</h2>
@@ -89,8 +105,6 @@
         <video id="qr-video" class="qr-video" playsinline muted hidden></video>
         <p id="qr-status" class="status" role="status"></p>
       </div>
-
-      <div id="results" class="results" aria-live="polite"></div>
     </section>
 
     <!-- ============ RECOVER ============ -->
@@ -179,14 +193,14 @@
     <p>Second Look is a prototype that offers guidance, not guarantees. When in doubt, contact the organization yourself using details you already trust.</p>
   </footer>
 
-  <script src="js/links.js?v=5"></script>
-  <script src="js/analyzer.js?v=5"></script>
-  <script src="js/redact.js?v=5"></script>
-  <script src="js/recovery.js?v=5"></script>
-  <script src="js/samples.js?v=5"></script>
-  <script src="js/qr.js?v=5"></script>
-  <script src="js/call.js?v=5"></script>
-  <script src="js/regions.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="js/links.js?v=7"></script>
+  <script src="js/analyzer.js?v=7"></script>
+  <script src="js/redact.js?v=7"></script>
+  <script src="js/recovery.js?v=7"></script>
+  <script src="js/samples.js?v=7"></script>
+  <script src="js/qr.js?v=7"></script>
+  <script src="js/call.js?v=7"></script>
+  <script src="js/regions.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

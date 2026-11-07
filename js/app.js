@@ -280,13 +280,13 @@
     // 6b. Where to report it, for the person's country
     const reg = region();
     parts.push(`
-      <section class="card" aria-labelledby="report-h">
-        <h2 id="report-h">Report it</h2>
+      <details class="card fold" id="report-fold">
+        <summary><h2>Report it <span class="muted small">(${esc(reg.name)})</span></h2></summary>
         <p class="muted small">Reporting helps stop the same scammer reaching other people. Type these in yourself.</p>
         <ul class="verify-list">${[reg.spam, ...reg.report].map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
         <label class="small" for="region-results">Your country:</label>
         <select id="region-results" class="btn ghost select region-select">${regionOptions()}</select>
-      </section>`);
+      </details>`);
 
     // 7. Ask someone I trust (redacted)
     const red = SL.redact.redact(text);
@@ -317,19 +317,19 @@
 
     // 9. Limits
     parts.push(`
-      <section class="card" aria-labelledby="limits-h">
-        <h2 id="limits-h">What this can't tell you</h2>
+      <details class="card fold" id="limits-fold">
+        <summary><h2>What this can't tell you</h2></summary>
         <ul class="plain-list small">${r.caveats.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
-      </section>`);
+      </details>`);
 
     // A re-check (e.g. after answering a question) must not move the page or close what was open.
     const anchor = !fresh && active && document.getElementById(active);
     const anchorTop = anchor ? anchor.getBoundingClientRect().top : 0;
-    const whyOpen = !fresh && !!$(".why[open]", results);
+    const openFolds = fresh ? [] : $$("details[open]", results).map((d) => d.id);
 
     results.innerHTML = parts.join("");
     wireResults(r);
-    if (whyOpen) $(".why", results).open = true;
+    for (const id of openFolds) if (id && document.getElementById(id)) document.getElementById(id).open = true;
     if (fresh) {
       const h = $("#verdict-h");
       h.focus({ preventScroll: true });
@@ -347,7 +347,7 @@
     const total = r.breakdown.reduce((a, b) => a + b.points, 0);
     const fmt = (n) => "+" + (Math.round(n * 10) / 10);
     return `
-      <details class="why no-print">
+      <details class="why no-print" id="why-fold">
         <summary>Why this level?</summary>
         ${r.breakdown.length ? `<ul class="why-list">
           ${r.breakdown.map((b) => `<li><span class="pts">${fmt(b.points)}</span><span>${esc(b.label)}</span></li>`).join("")}
