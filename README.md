@@ -1,6 +1,8 @@
 # Second Look
 
 **A calm second opinion for the message you hesitate to click.**
+
+**[Try it live](https://hasini0.github.io/second-look/)** · works on your phone, no install, nothing leaves your device
 Paste a suspicious text, email or DM, or scan a QR code. Second Look points out the scam tactics in plain words, X-rays links and QR codes without opening them, tells you a safe next step, and helps you act. Your message never leaves your device.
 
 Built for **Next Byte Hacks V5**. Everything here was created during the event (first commit Oct 28, 2026; the event runs Oct 6 – Nov 8, 2026).

@@ -110,7 +110,7 @@ html, css, javascript, barcodedetector-api, getusermedia, service-worker, web-sh
 - **AI assistance:** Claude (Anthropic) was used to help write code, test messages and copy. [Describe how your team reviewed and edited the output.]
 
 ## Try it
-- **Live demo:** [your GitHub Pages URL, e.g. https://USERNAME.github.io/second-look/]
-- **Source:** [your GitHub repo URL]
+- **Live demo:** https://hasini0.github.io/second-look/
+- **Source:** https://github.com/hasini0/second-look
 - **Run locally:** download the repo, then `python3 -m http.server 8000` in the folder and open http://localhost:8000. You can also open `index.html` directly (everything except offline mode works).
 - **Tests:** `node --test` · **Evaluation:** `node eval/run.js`
