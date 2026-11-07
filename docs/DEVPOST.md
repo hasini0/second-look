@@ -6,7 +6,7 @@
 Second Look
 
 ## Short pitch (tagline)
-A calm second opinion for the message or QR code you hesitate to trust. It explains the scam tactics in plain words, X-rays links and QR codes without opening them, and helps you act, all without anything leaving your device.
+A calm second opinion for any message, QR code or phone call you're unsure about. It explains the scam trick in plain words and tells you what to do, and nothing leaves your device.
 
 ## Team
 [Your name(s), and everyone who contributed]
@@ -57,7 +57,7 @@ Everyday people who get a suspicious text, email or DM, especially those most ta
 - **Installable app with "Share to Second Look"** (Web Share Target) on Android. Shared text is served from the offline cache so it never reaches the web server, and it's wiped from the address bar immediately.
 - **Accessible:** semantic HTML, keyboard support, visible focus, screen-reader labels on every highlight, colour never used alone (shapes and words too), three text sizes, dark mode, reduced-motion support, works at phone width.
 - **Separated, data-driven modules** (`js/call.js`, `js/regions.js`, `js/qr.js` …): adding a warning sign, brand, country or QR type is one entry in a list. See `docs/EXTENDING.md`.
-- **23 automated tests** (`node --test`), including one that fails if the page and the offline cache ever load different versions of a file, and an evaluation script (`node eval/run.js`).
+- **24 automated tests** (`node --test`), including one that fails if the page and the offline cache ever load different versions of a file, and an evaluation script (`node eval/run.js`).
 
 ## How we measured it (evidence of a safer outcome)
 We wrote labelled synthetic test messages and evaluated in **rounds**. Each round, a *new* set was scored **once, blind**, before we looked at what it missed:
