@@ -181,6 +181,9 @@ textarea:focus { border-color: var(--accent); background: var(--surface); outlin
 .btn.tool:hover { border-color: var(--line); }
 .btn.tool svg { width: 18px; height: 18px; flex: none; }
 .btn.tool.select { padding-left: 16px; padding-right: 34px; width: 11.5rem; }
+/* .btn.tool's background shorthand would wipe out .select's arrow, so draw it again here */
+.btn.tool.select { background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 19px) 52%, calc(100% - 13px) 52%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 38px; }
 .select { appearance: none; padding-right: 32px; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 17px) 55%, calc(100% - 12px) 55%; background-size: 5px 5px; background-repeat: no-repeat; max-width: 100%; }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 
@@ -451,3 +454,4 @@ fieldset.card > legend + * { clear: both; }
 
 /* Headings the app moves focus to (for screen readers) don't need a visible ring */
 [tabindex="-1"]:focus { outline: none; }
+.short-note { background: var(--surface); border-radius: 12px; padding: 10px 14px; margin-top: 4px; }

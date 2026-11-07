@@ -151,6 +151,12 @@
     renderResults(text, report, fresh);
   }
 
+  // A few words with no link give the rules almost nothing to judge, e.g. someone typing
+  // the name of an example ("fake paypal alert") instead of picking it from the list.
+  function isShort(text) {
+    return text.trim().split(/\s+/).length < 8 && !/https?:|www\.|\.[a-z]{2,}\//i.test(text);
+  }
+
   function highlightHTML(text, highlights) {
     let html = "";
     let pos = 0;
@@ -184,6 +190,7 @@
           <h2 id="verdict-h" tabindex="-1">${esc(SL.analyzer.HEADLINES[r.level])}</h2>
           <p>${esc(r.summary)}</p>
           ${r.level === "few" ? "<p><strong>That doesn't mean it's safe.</strong> If you weren't expecting it, check another way.</p>" : ""}
+          ${r.level === "few" && isShort(text) ? '<p class="short-note">This is very short, so there\'s little to go on. Paste the <strong>whole message</strong> exactly as you got it, or pick one from <strong>Try an example</strong> above.</p>' : ""}
           ${r.contextNotes.map((n) => `<p class="context-note">${esc(n)}</p>`).join("")}
         </div>
         ${whyHTML(r)}
